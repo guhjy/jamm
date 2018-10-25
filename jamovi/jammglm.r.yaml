@@ -1,0 +1,219 @@
+---
+name:  jammGLM
+title: GLM Mediation Analysis
+jrs: '1.0'
+
+
+items:
+
+  - name: info
+    title: Models Info
+    type: Table
+    columns:
+       - name: info
+         type: text
+         title: ""
+         combineBelow: true
+
+       - name: specs
+         type: text
+         title: ""
+       - name: value
+         type: text
+         title: ""
+    clearWith:
+        - dep
+        - mediators
+        - factors
+        - covs
+        - modelTerms
+        - fixedIntercept
+        - moderatorsTerms
+
+
+  - name: pathmodelgroup
+    type: Group
+    title: Path Model
+    clearWith:
+                  - dep
+                  - mediators
+                  - factors
+                  - covs
+                  - mediatorsTerms
+                  - modelTerms
+                  - moderatorsTerms
+    items:
+            - name: pathmodel
+              title: Diagram
+              type: Image
+              description: a path model
+              width: 600
+              height: 500
+              renderFun: .showDiagram
+              clearWith:
+                  - dep
+                  - mediators
+                  - factors
+                  - covs
+                  - mediatorsTerms
+                  - modelTerms
+                  - moderatorsTerms
+              
+            - name: pathnotes
+              type: Table
+              title: ""
+              visible: false
+              columns:
+                  - name: info
+                    type: text
+                    title: "Path model notes"
+
+
+  - name: models
+    type: Group
+    title: Mediation 
+    visible: false
+    clearWith:
+        - dep
+        - mediators
+        - factors
+        - covs
+    items:
+          - name: main
+            title: Indirect and Total Effects
+            visible: true
+            type: Table
+            clearWith:
+                     - dep
+                     - modelTerms
+                     - contrasts
+                     - fixedIntercept
+                     - simpleScale
+            columns:
+                    - name: type
+                      title: "Type"
+                      type: text
+                      combineBelow: true
+                    - name: source
+                      title: "Effect"
+                      type: text
+                    - name: label
+                      title: "Contrasts"
+                      visible: false
+                      type: text
+                    - name: est
+                      title: "Estimate"
+                      type: number
+                    - name: se
+                      title: "SE"
+                      type: number
+                    - name: ci.lower
+                      type: number
+                      title: Lower
+                    - name: ci.upper
+                      type: number
+                      title: Upper
+                    - name: std.all
+                      type: number
+                      title: β
+                      visible: (effectSize:beta)
+                    - name: z
+                      title: "z"
+                      type: number
+                    - name: pvalue
+                      title: "p"
+                      type: number
+                      format: zto,pvalue
+
+
+          - name: medmodels
+            title: Mediators Models 
+            type: Array
+            description: an array of contrast coefficients tables
+            clearWith:
+                    - dep
+                    - modelTerms
+                    - contrasts
+                    - scaling
+                    - fixedIntercept
+                    - effectSize
+            template:
+                title:  $key
+                type: Table
+                columns:
+                    - name: source
+                      title: "Names"
+                      type: text
+                    - name: label
+                      title: "Effect"
+                      type: text
+                    - name: estimate
+                      title: "Estimate"
+                      type: number
+                    - name: se
+                      title: "SE"
+                      type: number
+                    - name: cilow
+                      type: number
+                      title: Lower
+                    - name: cihig
+                      type: number
+                      title: Upper
+                    - name: df
+                      title: "df"
+                      type: number
+                    - name: t
+                      title: "t"
+                      type: number
+                    - name: p
+                      title: "p"
+                      type: number
+                      format: zto,pvalue
+
+          - name: fullmodel
+            title: Parameter Estimates for the full model
+            visible: false
+            type: Table
+            clearWith:
+                     - dep
+                     - modelTerms
+                     - contrasts
+                     - fixedIntercept
+                     - simpleScale
+            columns:
+                    - name: source
+                      title: "Names"
+                      type: text
+                    - name: label
+                      title: "Effect"
+                      type: text
+                    - name: estimate
+                      title: "Estimate"
+                      type: number
+                    - name: se
+                      title: "SE"
+                      type: number
+                    - name: cilow
+                      type: number
+                      title: Lower
+                    - name: cihig
+                      type: number
+                      title: Upper
+                    - name: beta
+                      type: number
+                      title: β
+                      visible: (effectSize:beta)
+                    - name: df
+                      title: "df"
+                      type: number
+                    - name: t
+                      title: "t"
+                      type: number
+                    - name: p
+                      title: "p"
+                      type: number
+                      format: zto,pvalue
+
+
+
+

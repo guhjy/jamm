@@ -1,0 +1,23 @@
+---
+title: Advanced Mediation Models in Jamovi
+name: jamm
+version: 0.0.1
+jms: '1.0'
+authors:
+  - Marcello Gallucci
+maintainer: Marcello Gallucci <mcfanda@gmail.com>
+date: 2018-9-25
+type: R
+description: >-
+  A suite for estimation of mediational model, including multiple mediators, and
+  conditional mediation
+analyses:
+  - title: GLM Mediation Model
+    name: jammGLM
+    ns: jamm
+    menuGroup: Linear Models
+    menuSubgroup: Mediation
+    menuTitle: GLM Mediation Model
+    description: GLM mediation model
+
+...
