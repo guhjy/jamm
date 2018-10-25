@@ -1,4 +1,4 @@
-# AMM Suite for Mediation Models
+# jAMM: A Suite for Mediation Models
 
 jamovi Advanced Mediation Models 
 version 0.0.1
