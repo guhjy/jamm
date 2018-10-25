@@ -196,7 +196,6 @@ jammGLMClass <- R6::R6Class(
   ### update model info table
   goon<-ds.initModelInfo(self)  
   
-  if (goon) {
   ## build the models list
   medmodels64<-list()
   for (i in seq_along(mediators64))  
@@ -209,12 +208,6 @@ jammGLMClass <- R6::R6Class(
        for (j in seq_along(moderatorsTerms[[i]]))
          modTerms64[[i]][[j]]<-jmvcore::toB64(moderatorsTerms[[i]][[j]])
        
-  } else {
-    medmodels64<-NULL
-    fullmodel64<-NULL
-    modTerms64 <- NULL
-  }
-  
 
   #### let smart do the magic ####
   infos<-smartMediation$new(medmodels64,fullmodel64,moderators = modTerms64)
@@ -248,7 +241,6 @@ jammGLMClass <- R6::R6Class(
   box.size=.1+(max(length(infos$mediators),length(infos$independents))+3)^-8
   box.text=.80+(infos$nvars)^-2
   arr.lenght=1/(infos$nvars-1)
-  mark(paths$labs)
   labs<-jmvcore::fromB64(paths$labs)
   ### first we plot the linear models paths diagram
   plot<-diagram::plotmat(paths$paths, pos=paths$pos, 

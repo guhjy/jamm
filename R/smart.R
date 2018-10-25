@@ -43,6 +43,10 @@ smartMediation <- R6Class("smartMediation",
                   self$M<-.toMatrix(self$M,self$medmodels,self$fullmodel,"P")  
                   private$indirects()
                   },
+                isEstimable=function() {
+                  (!self$isImpossible && !self$hasRequired())
+                },
+                
                 hasRequired=function() {
                   (any(self$M=="R") || length(grep(".....",self$vars,fixed = T)>0))
                 },

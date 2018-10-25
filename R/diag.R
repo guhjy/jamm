@@ -71,9 +71,11 @@ diag.paths<-function(infos,suggested=F,shiftmed=0) {
   }
 
   
-  
-  LABS<-jmvcore::toB64(gsub(".....","=?",infos$vars,fixed = T))
-  
+
+  LABS<-gsub("X.....",jmvcore::toB64("X=?"),infos$vars,fixed = T)
+  LABS<-gsub("M.....",jmvcore::toB64("M=?"),LABS,fixed = T)
+  LABS<-gsub("Y.....",jmvcore::toB64("Y=?"),LABS,fixed = T)
+  mark(LABS)
   CUR<-.curves(infos)
   POS<-.positions(infos)
   return(list(paths=PAT,colors=COL,

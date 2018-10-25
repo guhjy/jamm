@@ -116,7 +116,7 @@ ds.modelInfo <- function(infos, self, n64) {
                      list(info = "Overal Model", value = "The mediational model is incomplete"))
   }
   
-  if (!(infos$isImpossible)) {
+  if (infos$isEstimable()) {
     
     forms<-infos$original_medmodels
     forms[[length(infos$original_medmodels)+1]]<-infos$original_fullmodel
