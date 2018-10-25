@@ -14,12 +14,15 @@ jammGLMClass <- R6::R6Class(
       factors<-self$options$factors
       mediators<-self$options$mediators
       ciWidth<-self$options$ciWidth
-      
+
+
       ### here we initialize things ####
       data<-private$.cleandata()
       infos<-private$.prepareDiagram() 
-      if (infos$isImpossible)   return()
 
+      if (infos$isImpossible)   return()
+      if (infos$hasRequired())   return()
+      
       meds<-lapply(infos$original_medmodels, function(m) {
         m$ind=private$.names64$factorize(m$ind)
         m
@@ -190,7 +193,10 @@ jammGLMClass <- R6::R6Class(
 
   n64<-private$.names64
   
+  ### update model info table
+  goon<-ds.initModelInfo(self)  
   
+  if (goon) {
   ## build the models list
   medmodels64<-list()
   for (i in seq_along(mediators64))  
@@ -203,7 +209,11 @@ jammGLMClass <- R6::R6Class(
        for (j in seq_along(moderatorsTerms[[i]]))
          modTerms64[[i]][[j]]<-jmvcore::toB64(moderatorsTerms[[i]][[j]])
        
- 
+  } else {
+    medmodels64<-NULL
+    fullmodel64<-NULL
+    modTerms64 <- NULL
+  }
   
 
   #### let smart do the magic ####
@@ -219,12 +229,10 @@ jammGLMClass <- R6::R6Class(
   #         }
   ## save the results for showing later      
   image$setState(list(paths=paths,infos=infos))
-      
   #### includes possible diagrams notes 
       notes<-self$results$pathmodelgroup$pathnotes
       ds.annotate.diagram(infos,paths,notes,self$options,n64)       
-  ### update model info table
-      ds.modelInfo(infos,self,n64)  
+   ds.modelInfo(infos,self,n64)
    return(infos)      
       
 },  
@@ -240,8 +248,8 @@ jammGLMClass <- R6::R6Class(
   box.size=.1+(max(length(infos$mediators),length(infos$independents))+3)^-8
   box.text=.80+(infos$nvars)^-2
   arr.lenght=1/(infos$nvars-1)
+  mark(paths$labs)
   labs<-jmvcore::fromB64(paths$labs)
-  
   ### first we plot the linear models paths diagram
   plot<-diagram::plotmat(paths$paths, pos=paths$pos, 
                   name= labs,box.size = box.size,

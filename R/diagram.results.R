@@ -51,16 +51,20 @@ ds.annotate.diagram <- function(infos, paths, notes, options, n64) {
   }
 }
 
-ds.modelInfo <- function(infos, self, n64) {
+ds.initModelInfo <- function(self) {
   
+
+  goon<-TRUE
   infoTable <- self$results$info
   if (!is.something(self$options$dep)) {
+
     infoTable$addRow(rowKey = "gs1",
                      list(
                        info = "Get started",
                        specs = "",
                        value = "Select the dependent variable"
                      ))
+    goon<-FALSE
   }
   if (!is.something(self$options$mediators)) {
     infoTable$addRow(rowKey = "gs2",
@@ -69,6 +73,8 @@ ds.modelInfo <- function(infos, self, n64) {
                        specs = "",
                        value = "Select at least one mediator"
                      ))
+    goon<-FALSE
+    
   }
   if (!is.something(self$options$factors) &&
       !is.something(self$options$covs)) {
@@ -80,6 +86,8 @@ ds.modelInfo <- function(infos, self, n64) {
         value = "Select at least one factor or covariate as independent variable"
       )
     )
+    goon<-FALSE
+    
   } else
     if (!is.something(self$options$modelTerms)) {
       infoTable$addRow(rowKey = "gs4",
@@ -89,6 +97,13 @@ ds.modelInfo <- function(infos, self, n64) {
                          value = "Fill in the model"
                        ))
     }
+  return(goon)
+}
+
+
+ds.modelInfo <- function(infos, self, n64) {
+    
+  infoTable <- self$results$info
   
   if (infos$hasSuggested())
     infoTable$addRow(
@@ -178,5 +193,4 @@ ds.modelInfo <- function(infos, self, n64) {
                          value = .nicifychain(infos$impossibles[[i]])
                        ))
   }
-  
 }

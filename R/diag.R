@@ -72,7 +72,8 @@ diag.paths<-function(infos,suggested=F,shiftmed=0) {
 
   
   
-  LABS<-gsub(".....","=?",infos$vars,fixed = T)
+  LABS<-jmvcore::toB64(gsub(".....","=?",infos$vars,fixed = T))
+  
   CUR<-.curves(infos)
   POS<-.positions(infos)
   return(list(paths=PAT,colors=COL,
