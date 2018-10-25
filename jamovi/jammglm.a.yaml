@@ -76,11 +76,11 @@ options:
       options:
         - name: standard
           title: Standard
-        - name: bootbc
+        - name: bca.simple
           title: Bootstrap (BC)
-        - name: bootperc
+        - name: perc
           title: Bootstrap (Percent)
-        - name: bootnorm
+        - name: norm
           title: Bootstrap (Normal)
         - name: none
           title: None
@@ -100,6 +100,15 @@ options:
           R: >
             a number between 50 and 99.9 (default: 95) specifying the confidence
             interval width for the parameter estimates
+
+    - name: bootN
+      title: Bootstrap Rep.
+      type: Number
+      min: 50
+      default: 1000
+      description:
+          R: >
+            number of bootstrap samples for estimating confidence intervals
 
     - name: contrasts
       title: Factors Coding

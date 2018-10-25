@@ -14,8 +14,8 @@ jammGLMClass <- R6::R6Class(
       factors<-self$options$factors
       mediators<-self$options$mediators
       ciWidth<-self$options$ciWidth
-
-
+      ciType<-self$options$ciType
+      
       ### here we initialize things ####
       data<-private$.cleandata()
       infos<-private$.prepareDiagram() 
@@ -65,6 +65,10 @@ jammGLMClass <- R6::R6Class(
       }
       if (is.something(infos$moderators))
           table$setTitle("Indirect and Total Effects (averaged across moderators)")
+      
+      add<-ifelse(ciType=="standard" || ciType=="none","",". This may take a while")
+      .note<-paste0(NOTES[["ci"]][[ciType]],add)
+      table$setNote("cinote",paste("(a) Confidence intervals computed with method:",.note))
         
       ### here we go, enter statistics     
       mi.initContrastCode(data,self$options,self$results,n64)
@@ -80,6 +84,7 @@ jammGLMClass <- R6::R6Class(
       infos<-private$.infos
       ciWidth<-self$options$ciWidth/100
       ciType<-self$options$ciType
+      bootN<-self$options$bootN
       
       if (is.null(dep))
         return()
@@ -108,8 +113,9 @@ jammGLMClass <- R6::R6Class(
       ## the first row, it format the table well because it uses the rowKey appropriately
       
       table<-self$results$models$main
-      fit<-jmf.mediationSummary(infos,data)
-      params<-jmf.mediationInference(fit,level = ciWidth)
+      se<-ifelse(ciType=="standard" || ciType=="none",ciType,"bootstrap")
+      fit<-jmf.mediationSummary(infos,data, se=se,bootN=bootN)
+      params<-jmf.mediationInference(fit,level = ciWidth, boot.ci=ciType)
 
       table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
       for (rowKey in table$rowKeys) {

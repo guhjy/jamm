@@ -308,17 +308,17 @@ children:
                 optionName: ciType
                 optionPart: standard
               - type: RadioButton
-                name: ciType_bootbc
+                name: ciType_bc
                 optionName: ciType
-                optionPart: bootbc
+                optionPart: bca.simple
               - type: RadioButton
                 name: ciType_bootperc
                 optionName: ciType
-                optionPart: bootperc
+                optionPart: perc
               - type: RadioButton
                 name: ciType_bootnorm
                 optionName: ciType
-                optionPart: bootnorm
+                optionPart: norm
               - type: RadioButton
                 name: ciType_none
                 optionName: ciType
@@ -328,5 +328,9 @@ children:
                 name: ciWidth
                 label: Interval
                 suffix: '%'
+                format: number
+                inputPattern: '[0-9]+'
+              - type: TextBox
+                name: bootN
                 format: number
                 inputPattern: '[0-9]+'

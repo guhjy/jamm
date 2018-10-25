@@ -13,6 +13,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             modelTerms = NULL,
             ciType = "standard",
             ciWidth = 95,
+            bootN = 1000,
             contrasts = NULL,
             showRealNames = TRUE,
             showContrastCode = FALSE,
@@ -68,9 +69,9 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 ciType,
                 options=list(
                     "standard",
-                    "bootbc",
-                    "bootperc",
-                    "bootnorm",
+                    "bca.simple",
+                    "perc",
+                    "norm",
                     "none"),
                 default="standard")
             private$..ciWidth <- jmvcore::OptionNumber$new(
@@ -79,6 +80,11 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                 min=50,
                 max=99.9,
                 default=95)
+            private$..bootN <- jmvcore::OptionNumber$new(
+                "bootN",
+                bootN,
+                min=50,
+                default=1000)
             private$..contrasts <- jmvcore::OptionArray$new(
                 "contrasts",
                 contrasts,
@@ -193,6 +199,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..modelTerms)
             self$.addOption(private$..ciType)
             self$.addOption(private$..ciWidth)
+            self$.addOption(private$..bootN)
             self$.addOption(private$..contrasts)
             self$.addOption(private$..showRealNames)
             self$.addOption(private$..showContrastCode)
@@ -214,6 +221,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         modelTerms = function() private$..modelTerms$value,
         ciType = function() private$..ciType$value,
         ciWidth = function() private$..ciWidth$value,
+        bootN = function() private$..bootN$value,
         contrasts = function() private$..contrasts$value,
         showRealNames = function() private$..showRealNames$value,
         showContrastCode = function() private$..showContrastCode$value,
@@ -234,6 +242,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..modelTerms = NA,
         ..ciType = NA,
         ..ciWidth = NA,
+        ..bootN = NA,
         ..contrasts = NA,
         ..showRealNames = NA,
         ..showContrastCode = NA,
@@ -540,6 +549,8 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param ciType Choose the confidence interval type
 #' @param ciWidth a number between 50 and 99.9 (default: 95) specifying the
 #'   confidence interval width for the parameter estimates
+#' @param bootN number of bootstrap samples for estimating confidence
+#'   intervals
 #' @param contrasts a list of lists specifying the factor and type of contrast
 #'   to use, one of \code{'deviation'}, \code{'simple'}, \code{'difference'},
 #'   \code{'helmert'}, \code{'repeated'} or \code{'polynomial'}
@@ -588,6 +599,7 @@ jammGLM <- function(
     modelTerms = NULL,
     ciType = "standard",
     ciWidth = 95,
+    bootN = 1000,
     contrasts = NULL,
     showRealNames = TRUE,
     showContrastCode = FALSE,
@@ -623,6 +635,7 @@ jammGLM <- function(
         modelTerms = modelTerms,
         ciType = ciType,
         ciWidth = ciWidth,
+        bootN = bootN,
         contrasts = contrasts,
         showRealNames = showRealNames,
         showContrastCode = showContrastCode,

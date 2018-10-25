@@ -5,8 +5,8 @@ GAMLj_INFO=T
 NOTES<-list()
 
 NOTES[["ci"]]<-list("standard"="Standard (Delta method)",
-                    "bootbc"="Bias corrected bootstrap (fake)",
-                    "bootperc"="Bootstrap percentiles (fake)",
-                    "bootnorm"="Parametric bootstrap (fake)")
+                    "bca.simple"="Bias corrected bootstrap",
+                    "perc"="Bootstrap percentiles",
+                    "norm"="Parametric bootstrap")
 
 

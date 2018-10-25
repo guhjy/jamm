@@ -1,5 +1,5 @@
 
-jmf.mediationSummary<-function(infos,data,se="standard", nboot=1000) {
+jmf.mediationSummary<-function(infos,data,se="standard", bootN=1000) {
 
   models<-infos$original_medmodels
   models[[length(models)+1]]<-infos$original_fullmodel
@@ -13,7 +13,7 @@ jmf.mediationSummary<-function(infos,data,se="standard", nboot=1000) {
    amodifier<-paste(paste0(ie,collapse = "_"),amodifier,sep = ":=")
    lavformula<-paste(lavformula,amodifier,sep=";")
   }
-  fit<-try(lavaan::sem(lavformula,data=data,se = se, bootstrap = nboot))
+  fit<-try(lavaan::sem(lavformula,data=data,se = se, bootstrap = bootN))
   if (jmvcore::isError(fit)) {
    msg<-jmvcore::extractErrorMessage(fit)
    if (is.something(grep("positive definite",msg)))
