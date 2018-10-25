@@ -16,7 +16,7 @@ version 0.0.1
 
 # Not implemented
 
-* The simple mediational effects (at different levels of moderators)
+* Simple mediational effects (estimated at different levels of moderators)
 * Interactions among moderators of moderators (not really high priority)
 * Rigorous checks for weired and complex models 
 
