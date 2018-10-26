@@ -48,6 +48,7 @@ ds.annotate.diagram <- function(infos, paths, notes, options, n64) {
     for (l in seq_along(labs))
       notes$addRow(paste0("labels", l), list(info = labs[[l]]))
     notes$setVisible(TRUE)
+
   }
 }
 

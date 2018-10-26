@@ -118,13 +118,11 @@ mi.getResDf<- function(x,...) UseMethod(".getResDf")
 
 mi.initContrastCode<-function(data,options,results,n64) {
   
-  if (!options$showContrastCode) 
-    return()
-  
+
   factorsAvailable <- options$factors
   if (length(factorsAvailable)==0)
     return()
-  tables<-results$main$contrastCodeTables
+  tables<-results$models$contrastCodeTables
   for (fac in factorsAvailable) {
     rnames<-n64$nicenames(n64$contrasts(fac))
     clabs<-n64$contrastsLabels(fac)
@@ -139,12 +137,7 @@ mi.initContrastCode<-function(data,options,results,n64) {
     for (i in 1:nrow(codes)) {
       aTable$addRow(rowKey=i, values=codes[i,])
     }
-    int<-"sample mean"
-    contr<-attr(data[[jmvcore::toB64(fac)]],"jcontrast")
-    if (contr=="dummy")
-      int=paste0(fac,"=",levels(data[[jmvcore::toB64(fac)]])[1])
-    aTable$setNote("int", paste("Intercept computed for",int))
-    
+  tables$setVisible(TRUE)
   }  
   
 }

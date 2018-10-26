@@ -334,6 +334,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
                     main = function() private$.items[["main"]],
+                    contrastCodeTables = function() private$.items[["contrastCodeTables"]],
                     medmodels = function() private$.items[["medmodels"]],
                     fullmodel = function() private$.items[["fullmodel"]]),
                 private = list(),
@@ -399,6 +400,25 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     `title`="p", 
                                     `type`="number", 
                                     `format`="zto,pvalue"))))
+                        self$add(jmvcore::Array$new(
+                            options=options,
+                            name="contrastCodeTables",
+                            title="Contrast Coefficients",
+                            visible=FALSE,
+                            clearWith=list(
+                                "contrasts"),
+                            template=jmvcore::Table$new(
+                                options=options,
+                                title="$key",
+                                columns=list(
+                                    list(
+                                        `name`="rnames", 
+                                        `title`="Name", 
+                                        `type`="text"),
+                                    list(
+                                        `name`="clabs", 
+                                        `title`="Contrast", 
+                                        `type`="text")))))
                         self$add(jmvcore::Array$new(
                             options=options,
                             name="medmodels",
@@ -576,6 +596,7 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$pathmodelgroup$pathmodel} \tab \tab \tab \tab \tab a path model \cr
 #'   \code{results$pathmodelgroup$pathnotes} \tab \tab \tab \tab \tab a table \cr
 #'   \code{results$models$main} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$models$contrastCodeTables} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #'   \code{results$models$medmodels} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #'   \code{results$models$fullmodel} \tab \tab \tab \tab \tab a table \cr
 #' }

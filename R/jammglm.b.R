@@ -78,9 +78,10 @@ jammGLMClass <- R6::R6Class(
       add<-ifelse(ciType=="standard" || ciType=="none","",". This may take a while")
       .note<-paste0(NOTES[["ci"]][[ciType]],add)
       table$setNote("cinote",paste("(a) Confidence intervals computed with method:",.note))
-        
-      ### here we go, enter statistics     
-      mi.initContrastCode(data,self$options,self$results,n64)
+      
+      if  (is.something(self$options$factors))   
+         mi.initContrastCode(data,self$options,self$results,private$.names64)
+      
     },
     .run=function() {
       n64<-private$.names64

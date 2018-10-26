@@ -120,6 +120,25 @@ items:
                       format: zto,pvalue
 
 
+          - name: contrastCodeTables
+            title: Contrast Coefficients 
+            type: Array
+            description: an array of contrast coefficients tables
+            visible: false
+            clearWith:
+                    - contrasts
+            template:
+                   title:  $key
+                   type: Table
+                   columns:
+                         - name: rnames
+                           title: 'Name'
+                           type: text
+                         - name: clabs
+                           title: 'Contrast'
+                           type: text
+
+
           - name: medmodels
             title: Mediators Models 
             type: Array
