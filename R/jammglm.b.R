@@ -19,7 +19,8 @@ jammGLMClass <- R6::R6Class(
       ### here we initialize things ####
       data<-private$.cleandata()
       infos<-private$.prepareDiagram() 
-
+      private$.infos<-infos
+      
       if (infos$isImpossible)   return()
       if (infos$hasRequired())   return()
       
@@ -116,11 +117,13 @@ jammGLMClass <- R6::R6Class(
         private$.cov_condition$storeValues(data)
         private$.cov_condition$labels_type=self$options$simpleScaleLabels
       }
-      infos<-private$.infos
       ## fill main mediational results
       ## notice that jmf.modelSummaries return first the individual coefficients
       ## and then the mediated effect. Because in .init the mediated effec is defined ad
       ## the first row, it format the table well because it uses the rowKey appropriately
+      mark(str(infos))
+      if (!infos$isEstimable())
+         return()
       
       table<-self$results$models$main
       se<-ifelse(ciType=="standard" || ciType=="none",ciType,"bootstrap")

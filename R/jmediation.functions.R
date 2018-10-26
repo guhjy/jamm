@@ -28,6 +28,8 @@ jmf.mediationSummary <-
         jmvcore::reject(
           "The model cannot be estimated. Please check whether the independent variables are too correlated or the model is ill-defined"
         )
+      else
+        jmvcore::reject(msg)
     }
     fit
     

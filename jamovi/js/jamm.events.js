@@ -26,11 +26,13 @@ const events = {
     },
 
     onChange_modelSupplier: function(ui) {
-       
+       fromSupplierToModelTerms(ui,this);
     },
     onChange_mediatorsSupplier: function(ui) {
        log("mediatorsSupplier has changed");
        fromSupplierToMediatorsTerms(ui, this);
+       fromMediatorsToModelTerms(ui, this);
+
     },
 
     onChange_moderatorsSupplier: function(ui) {
@@ -192,7 +194,7 @@ var fromSupplierToModelTerms= function(ui,context) {
     log("fromSupplierToModelTerms");
 
      var modelSupplierList = context.cloneArray(context.itemsToValues(ui.modelSupplier.value()),[]);
-     var modelTerms= context.cloneArray(ui.modelTerms,value(),[]);
+     var modelTerms= context.cloneArray(ui.modelTerms.value(),[]);
      var diff = context.findChanges("modelSupplierList",modelSupplierList,context);
      var  light = removeFromList(diff.removed,modelTerms,context,1);
      ui.modelTerms.setValue(light);    
@@ -267,8 +269,11 @@ var fromModeratorsToOthers = function(ui,context) {
     var noroom = false;
     for (var j = 0; j < mediators.length; j++)  { 
        var meds = mediatorsTerms[j];
-           meds = removeFromList(moderators,meds,context);
-           if (meds.length===0) {
+         log(meds)
+           var medstest = removeFromList(moderators,meds,context);
+           log(moderators)
+          log(medstest) 
+           if (medstest.length===0) {
               flashMGridOptionListControl(ui.moderatorsTerms,ui.modeNote);
               noroom = true;
       }
@@ -433,6 +438,7 @@ var removeFromList = function(quantum, cosmos, context, order = 1) {
                  if (test && (aCosmos.length >= order)) {
                         cosmos.splice(i, 1);
                         i -= 1;
+                    break;    
                     }
           }
             
