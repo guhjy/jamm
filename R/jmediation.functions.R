@@ -38,9 +38,11 @@ jmf.mediationTotal <-
 
         model <- infos$original_fullmodel
         meds<-infos$mediators
-        model$ind<-model$ind[!(model$ind %in% meds)]
+        ind<-lapply(model$ind, function(x) if(!any(x %in% meds)) x)
+        model$ind<-ind[!(sapply(ind, is.null))]
         .formula<-.modelFormula(model,"_t_")
-
+        mark("totals",model$ind)
+        mark(.formula)
         fit<-try(lavaan::sem(.formula,data = data))
         if (jmvcore::isError(fit)) {
             msg <- jmvcore::extractErrorMessage(fit)
@@ -93,8 +95,8 @@ jmf.mediationTable <- function(
 .modelFormula <- function(alist,sep="_") {
   dep <- alist$dep
   terms <- sapply(alist$ind, function(a) {
-    if (is.something(grep(":", a, fixed = T)))
-      a
+    if (length(a)>1)
+      paste0(a,collapse = ":")
     else
       paste(paste0(a, sep, dep), a, sep = " * ")
   })

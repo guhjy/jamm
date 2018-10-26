@@ -11,6 +11,7 @@ is.something<- function(x,...) UseMethod(".is.something")
 .is.something.logical<-function(obj) !is.na(obj)
 
 
+
 fill.if<-function(test,ifyes,ifnot) {
   
   if (test)
