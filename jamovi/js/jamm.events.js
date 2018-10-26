@@ -146,6 +146,7 @@ var fromSupplierToMediatorsTerms= function(ui,context) {
          var add = aList.length === 0 ? inds : removeFromList(mediators,diff.added,context);
          var add = addToList(add,aList,context);
          light[i] = combine(moderatorsTerms[i],add,context,0);
+         light[i] = cleanInteractions(moderatorsTerms[i],light[i],context);
      }
      
      // we remove the independent variables removed from the ui, if any
@@ -269,10 +270,7 @@ var fromModeratorsToOthers = function(ui,context) {
     var noroom = false;
     for (var j = 0; j < mediators.length; j++)  { 
        var meds = mediatorsTerms[j];
-         log(meds)
            var medstest = removeFromList(moderators,meds,context);
-           log(moderators)
-          log(medstest) 
            if (medstest.length===0) {
               flashMGridOptionListControl(ui.moderatorsTerms,ui.modeNote);
               noroom = true;
@@ -301,8 +299,10 @@ var fromModeratorsToOthers = function(ui,context) {
              var newTerm=diff.changes[diff.index].added[i];
          // add interactions to mediators terms if there are new moderators
              mediatorsTerms[diff.index]=combine(mediatorsTerms[diff.index],newTerm,context,0);
+             mediatorsTerms[diff.index]=cleanInteractions(moderatorsTerms[diff.index],mediatorsTerms[diff.index],context);
           // add interactions to full model terms if there are new moderators
            modelTerms=combine(modelTerms,newTerm,context,0);
+           modelTerms=cleanInteractions(moderators,modelTerms,context);
       }
       // remove interactions from mediators and full model terms if moderators are removed
       for (var i = 0; i < diff.changes[diff.index].removed.length; i++)  {
@@ -543,7 +543,8 @@ var combine = function(cosmos1, cosmos2 , context, order=2) {
         if (cosmos2===undefined)
                return order===0 ? cosmos1 : [] ;
         cosmos1 = normalize(cosmos1)
-        cosmos2 = normalize(cosmos2)
+        cosmos2 = normalize(cosmos2)        
+
         var light=[];
         for (var i = 0; i < cosmos1.length; i++) {
             var aValue1 = context.clone(cosmos1[i]);
@@ -635,6 +636,30 @@ var unflashMGridOptionListControl = function(widget,note=false) {
            note.$el[0].style.visibility="hidden";
 };
 
+var   cleanInteractions= function(quantum,cosmos,context){
+  if (quantum===undefined)
+    return(cosmos);
+    
+  var deny= context.getCombinations(quantum)  
+  for (var i=0; i < deny.length; i++) {
+    if (deny[i].length==1) {
+      deny.splice(i, 1);
+      i -= 1;
+    }
+  }
+  cosmos=context.cloneArray(cosmos)
+  for (var j=0; j< cosmos.length; j++) {
+    for (var i=0; i < deny.length; i++) {
+      if (FormatDef.term.contains(cosmos[j],deny[i])) {
+        cosmos.splice(j,1);
+        j -= 1;
+        break;
+      }
+  }
+}
+ return cosmos;
+  
+};
 
 
 module.exports = events;
