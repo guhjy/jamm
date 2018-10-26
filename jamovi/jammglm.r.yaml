@@ -36,9 +36,6 @@ items:
     title: Path Model
     clearWith:
                   - dep
-                  - mediators
-                  - factors
-                  - covs
                   - mediatorsTerms
                   - modelTerms
                   - moderatorsTerms
@@ -52,9 +49,6 @@ items:
               renderFun: .showDiagram
               clearWith:
                   - dep
-                  - mediators
-                  - factors
-                  - covs
                   - mediatorsTerms
                   - modelTerms
                   - moderatorsTerms

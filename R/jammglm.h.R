@@ -317,9 +317,6 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                             renderFun=".showDiagram",
                             clearWith=list(
                                 "dep",
-                                "mediators",
-                                "factors",
-                                "covs",
                                 "mediatorsTerms",
                                 "modelTerms",
                                 "moderatorsTerms")))

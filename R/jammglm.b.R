@@ -60,9 +60,18 @@ jammGLMClass <- R6::R6Class(
       
       for (te in infos$totaleffects) {
         rowKey=paste0(te,collapse = "_")
-        row<-list(source=.nicifychain64(te,private$.names64),type="Total")
+        row<-list(source=.nicifychain64(te,private$.names64),type="Direct")
         table$addRow(rowKey,row)
       }
+      table$addFormat(rowKey=paste0(infos$totaleffects[[1]],collapse = "_"),col=1,jmvcore::Cell.BEGIN_GROUP)
+        
+      for (te in infos$totaleffects) {
+          rowKey=paste0(te,collapse = "_t_")
+          row<-list(source=.nicifychain64(te,private$.names64),type="Total")
+          table$addRow(rowKey,row)
+        }
+        table$addFormat(rowKey=paste0(infos$totaleffects[[1]],collapse = "_t_"),col=1,jmvcore::Cell.BEGIN_GROUP)
+        
       if (is.something(infos$moderators))
           table$setTitle("Indirect and Total Effects (averaged across moderators)")
       
@@ -114,14 +123,16 @@ jammGLMClass <- R6::R6Class(
       
       table<-self$results$models$main
       se<-ifelse(ciType=="standard" || ciType=="none",ciType,"bootstrap")
-      fit<-jmf.mediationSummary(infos,data, se=se,bootN=bootN)
-      params<-jmf.mediationInference(fit,level = ciWidth, boot.ci=ciType)
+      params<-jmf.mediationTable(infos,data,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
 
       table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
       for (rowKey in table$rowKeys) {
       row<-params[params$label==rowKey,]
-      table$setRow(rowKey=rowKey,row)
+      if (dim(row)[1]>0)
+         table$setRow(rowKey=rowKey,row)
       }
+      totals<-jmf.mediationTotal(infos,data,ciWidth)
+      
     },
   .cleandata=function() {
       n64<-private$.names64
