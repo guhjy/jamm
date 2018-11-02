@@ -6,10 +6,10 @@ version 0.0.2
 # State of the art
 
 * It does the path model
-* Shows interactions in the path models
+* It shows interactions in the path models
 * It makes checks for coherence of the model
 * It makes suggestions toward more coherent models
-* Automatically guess which mediation model is more likely to be needed
+* Automatically guesses which mediation model is more likely to be needed
 * Custom models from UI
 * It estimates the model coefficients
  
@@ -22,7 +22,7 @@ version 0.0.2
 
 # Install
 
-Currently, jAMM can only being installed via R (Rstudio or equivelant software). First, you need to install R developing tools from CRAN and jamovi developing tools.
+Currently, jAMM can only being installed via R (or Rstudio and equivelant software). First, you need to install R developing tools from CRAN and jamovi developing tools.
 
 ```r
 
@@ -35,9 +35,9 @@ install.packages('jmvtools', repos=c('https://repo.jamovi.org', 'https://cran.r-
 Then you download jAMM module from this repository and install it
 
 ```r
-
 devtools::install_github("mcfanda/jamm")
-jmvtools::jmvtools::install()
+pkg<-paste0(.libPaths()[[1]],"jamm")
+jmvtools::install(pkg=pkg)
 
 ```
 
