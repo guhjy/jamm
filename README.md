@@ -1,7 +1,7 @@
 # jAMM: A Suite for Mediation Models
 
 jamovi Advanced Mediation Models 
-version 0.0.2
+version 0.0.3
 
 # State of the art
 
@@ -18,7 +18,7 @@ version 0.0.2
 
 * Simple mediational effects (estimated at different levels of moderators)
 * Interactions among moderators of moderators (not really high priority)
-* Rigorous checks for weired and complex models 
+* Rigorous checks for wired and complex models 
 
 # Install
 
@@ -42,7 +42,7 @@ jmvtools::install(pkg=pkg)
 ```
 
 If you are on linux and you are working with flatpak jamovi, you need to issue 
-
+  
 ```r
 devtools::install_github("mcfanda/jamm")
 pkg<-paste0(.libPaths()[[1]],"jamm")

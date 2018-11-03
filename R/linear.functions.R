@@ -150,7 +150,6 @@ lf.scaleContinuous<-function(var,method,by=NULL) {
           var<-scale(var,scale = F)  
   if (method=="cluster-based centered") {    
           var<-unlist(tapply(var,by,scale,scale=F))
-          print(tapply(var,by,mean))
   }
   if (method=="standardized") 
           var<-scale(var,scale = T)  

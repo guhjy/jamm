@@ -1,4 +1,14 @@
-gsimple.init<-function(data,options,tables) {
+### the simple effects are computed by conditioning the variables and rerun the model. Thus, here, 
+### we simple offer a function to condition the variables, plus a couple of functions
+### to smooth table filling.
+
+jsimple.conditioning<-function(infos,data,conditioning) {
+  
+  
+  
+}
+
+jsimple.init<-function(data,options,tables) {
 
   dep<-options$dep
   variable<-options$simpleVariable
@@ -9,10 +19,7 @@ gsimple.init<-function(data,options,tables) {
   if (is.null(variable) | is.null(moderator)) 
      return()
     
-    modelType<-"linear"
-    if ("modelSelection" %in% names(options))
-      modelType<-options$modelSelection
-
+ 
     ###### encode the names    
     dep64<-jmvcore::toB64(dep)
     variable64<-jmvcore::toB64(variable)
