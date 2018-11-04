@@ -47,12 +47,16 @@ jammGLMClass <- R6::R6Class(
 
         if (is.something(infos$moderators)) {
            table$setTitle("Indirect and Total Effects (averaged across moderators)")
-        
-         for (i in seq_along(infos$moderators)) {
+
+         moderators<-unique(unlist(sapply(infos$moderators,private$.names64$factorName)))
+
+         for (i in seq_along(moderators)) {
               mod<-infos$moderators[i]
-              labels<-private$.cov_condition$labels(mod,decode=T)
+              mod<-private$.names64$factorName(mod)
+              labels<-private$.cov_condition$labels(mod)
+              mark(labels)
               for (i in seq_along(labels)) {
-                key<-paste(jmvcore::fromB64(mod),labels[i],sep = "=")
+                key<-paste(mod,labels[i],sep = "=")
                 aTable<-self$results$simplemodels$addItem(key=key)
                 mr.initTable(infos,aTable,private$.names64,ciType,ciWidth)
           }
@@ -110,16 +114,23 @@ jammGLMClass <- R6::R6Class(
       if (dim(row)[1]>0)
          table$setRow(rowKey=rowKey,row)
       }
-      for (i in seq_along(infos$moderators)) {
-       mod<-infos$moderators[i]
-       values<-private$.cov_condition$values(mod,decode=T)
-       labels<-private$.cov_condition$labels(mod,decode=T)
+      moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
+      for (i in seq_along(moderators)) {
+       mod<-moderators[i]
+       values<-private$.cov_condition$values(mod)
+       labels<-private$.cov_condition$labels(mod)
+       mod64<-jmvcore::toB64(mod)
+       
        for (i in seq_along(labels)) {
-         key<-paste(jmvcore::fromB64(mod),labels[i],sep = "=")
+         key<-paste(mod,labels[i],sep = "=")
          table<-self$results$simplemodels$get(key=key)
-         value<-values[[1]][i]
          ldata<-data
-         ldata[,mod]<-ldata[,mod]-value
+         condata<-private$.cov_condition$center(mod,ldata,i)
+         mark(head(condata))
+         for (var in names(condata)) {
+             ldata[,var]<-condata[,var]
+         }
+
          params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
          for (rowKey in table$rowKeys) {
            row<-params[params$label==rowKey,]
@@ -139,31 +150,6 @@ jammGLMClass <- R6::R6Class(
 
       dataRaw <- self$data
       data <- list()
-      for (factor in factors) {
-        ### we need this for Rinterface ####
-        if (!("factor" %in% class(dataRaw[[factor]]))) {
-          info(paste("Warning, variable",factor," has been coerced to factor"))
-          dataRaw[[factor]]<-factor(dataRaw[[factor]])
-        }
-        data[[jmvcore::toB64(factor)]] <- dataRaw[[factor]]
-        levels <- base::levels(data[[jmvcore::toB64(factor)]])
-        stats::contrasts(data[[jmvcore::toB64(factor)]]) <- lf.createContrasts(levels,"deviation")
-        n64$addFactor(factor,levels)
-        n64$addLabel(factor,lf.contrastLabels(levels, "deviation")) 
-        attr(data[[jmvcore::toB64(factor)]],"jcontrast")<-"deviation"
-      }
-      
-      for (contrast in self$options$contrasts) {
-        levels <- base::levels(data[[jmvcore::toB64(contrast$var)]])
-        stats::contrasts(data[[jmvcore::toB64(contrast$var)]]) <- lf.createContrasts(levels, contrast$type)
-        n64$addLabel(contrast$var,lf.contrastLabels(levels, contrast$type)) 
-        attr(data[[jmvcore::toB64(contrast$var)]],"jcontrast")<-contrast$type
-        dummies<-model.matrix(as.formula(paste0("~",jmvcore::toB64(contrast$var))),data=data)
-        dummies<-dummies[,-1]
-        dummies<-data.frame(dummies)
-        names(dummies)<-unlist(n64$contrasts(contrast$var))
-        data<-cbind(data,dummies)
-      }
       
       if ( ! is.null(dep)) {
         data[[jmvcore::toB64(dep)]] <- jmvcore::toNumeric(dataRaw[[dep]])
@@ -183,6 +169,33 @@ jammGLMClass <- R6::R6Class(
       for (med in mediators) {
         data[[jmvcore::toB64(med)]] <- jmvcore::toNumeric(dataRaw[[med]])
         n64$addVar(med)
+      }
+
+      for (factor in factors) {
+        ### we need this for Rinterface ####
+        if (!("factor" %in% class(dataRaw[[factor]]))) {
+          info(paste("Warning, variable",factor," has been coerced to factor"))
+          dataRaw[[factor]]<-factor(dataRaw[[factor]])
+        }
+        data[[jmvcore::toB64(factor)]] <- dataRaw[[factor]]
+        levels <- base::levels(data[[jmvcore::toB64(factor)]])
+        stats::contrasts(data[[jmvcore::toB64(factor)]]) <- lf.createContrasts(levels,"deviation")
+        n64$addFactor(factor,levels)
+        n64$addLabel(factor,lf.contrastLabels(levels, "deviation")) 
+        attr(data[[jmvcore::toB64(factor)]],"jcontrast")<-"deviation"
+        private$.cov_condition$addFactor(factor,levels)
+      }
+      
+      for (contrast in self$options$contrasts) {
+        levels <- base::levels(data[[jmvcore::toB64(contrast$var)]])
+        stats::contrasts(data[[jmvcore::toB64(contrast$var)]]) <- lf.createContrasts(levels, contrast$type)
+        n64$addLabel(contrast$var,lf.contrastLabels(levels, contrast$type)) 
+        attr(data[[jmvcore::toB64(contrast$var)]],"jcontrast")<-contrast$type
+        dummies<-model.matrix(as.formula(paste0("~",jmvcore::toB64(contrast$var))),data=data)
+        dummies<-dummies[,-1]
+        dummies<-data.frame(dummies)
+        names(dummies)<-unlist(n64$contrasts(contrast$var))
+        data<-cbind(data,dummies)
       }
       
       private$.names64<-n64

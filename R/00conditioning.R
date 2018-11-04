@@ -1,6 +1,6 @@
 library(R6)
-# this class will take care of conditioning of covariates. Because is jamovi when you need the labels
-# you might not have the data (as in .init()), the class would compute the labels even without data.
+# this class will take care of conditioning of covariates. Because in jamovi, you might not have the
+# data when you need the labels (as in .init()), the class would compute the labels even without data.
 # when the data are available, it computes the actual conditioning values and, if requested, labels=values
 
 # Conditioning of covariates can come in different forms:
@@ -15,7 +15,10 @@ library(R6)
 # percentile around the median. The option "span" can be a number which applies to all variables, or vector
 # or number that applies in order to corresponding variables. Partial vector is fine, the remaining is set to 1
 
-# In jamovi span and method are applied to all covariates. In R can be 
+# In jamovi span and method are applied to all covariates. In R they can be differentiated.
+
+# In this version also the categorical variables can be conditioned, because in jAMM we need to treat dummies as new 
+# variables and cannot rely to levels() and contrasts() in the model.
 
 conditioning <- R6Class("conditioning",
         public=list(
@@ -25,10 +28,17 @@ conditioning <- R6Class("conditioning",
                 return(self)
             if (is.list(method) & !is.null(names(method))) 
                 if (!all(names(method) %in% vars))
-                  stop("Conditioning values are assignet to undefined variables")
+                  stop("Conditioning values are assigned to undefined variables")
             
             self$vars<-vars
             private$init(method,span)
+        },
+        addFactor=function(var,levels) {
+          obj<-list()
+          obj$values<-unlist(levels)
+          obj$method<-"factor"
+          obj$labels<-unlist(levels)
+          private$cond_specs[[var]]<-obj
         },
         storeValues=function(vardata,varname=NULL,decode=FALSE) {
           
@@ -130,8 +140,23 @@ conditioning <- R6Class("conditioning",
           if (length(res)==1)
             res<-res[[1]]
           res
-        }
-        ),
+        },
+        center=function(var,data,valueindex,decode=T) {
+          obj<-private$cond_specs[[var]]
+          if (decode) var<-jmvcore::toB64(var)
+          if (obj$method=="factor") {
+            .levels<-levels(data[,var])
+            stats::contrasts(data[,var]) <- lf.createContrasts(.levels,"dummy",base=valueindex)
+            dummies<-model.matrix(as.formula(paste0("~",var)),data=data)
+            dummies<-dummies[,-1]
+            dummies<-data.frame(dummies)
+            dummies
+          } else {
+             df<-data.frame(data[,var]-obj$values[valueindex])
+             names(df)<-var
+             df
+          }
+        }),
         private=list(
           cond_specs=list(),
           init=function(method,span) {
