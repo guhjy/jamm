@@ -118,8 +118,6 @@ jammGLMClass <- R6::R6Class(
          key<-paste(jmvcore::fromB64(mod),labels[i],sep = "=")
          table<-self$results$simplemodels$get(key=key)
          value<-values[[1]][i]
-         mark(key)
-         mark(value)
          ldata<-data
          ldata[,mod]<-ldata[,mod]-value
          params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
@@ -233,7 +231,7 @@ jammGLMClass <- R6::R6Class(
   infos<-smartMediation$new(medmodels64,fullmodel64,moderators = modTerms64)
   #### prepare the diagram
   image <- self$results$pathmodelgroup$get('pathmodel')
-  paths<-diag.paths(infos,suggested = T)
+  paths<-diag.paths(infos,suggested = T,shiftmed=.01)
 
   # for (i in seq_along(paths$labs))
   #         if (paths$labs[[i]] %in% factors) {

@@ -75,9 +75,8 @@ diag.paths<-function(infos,suggested=F,shiftmed=0) {
   LABS<-gsub("X.....",jmvcore::toB64("X=?"),infos$vars,fixed = T)
   LABS<-gsub("M.....",jmvcore::toB64("M=?"),LABS,fixed = T)
   LABS<-gsub("Y.....",jmvcore::toB64("Y=?"),LABS,fixed = T)
-  mark(LABS)
   CUR<-.curves(infos)
-  POS<-.positions(infos)
+  POS<-.positions(infos,shiftmed = shiftmed )
   return(list(paths=PAT,colors=COL,
               curves=CUR,bcolors=BCOL,
               pos=POS,labs=LABS))
@@ -108,20 +107,21 @@ diag.paths<-function(infos,suggested=F,shiftmed=0) {
   M[medsx,1]<-.5
   M[.nvar,1]<-.90
   M[.nvar,2]<-ifelse(nx==1 & nm==1,.15,.50)
-  
   if (nm==1)
     return(as.matrix(M))
-  ### shift mediators in a chain
+
+    ### shift mediators in a chain
   
   M[.nvar,2]<-wherey
   colnames(M)<-c("x","y")
   rownames(M)<-infos$vars
-  PAT<-.paths(infos,val=1)
+  PAT<-infos$M
   PAT<-PAT[infos$mediators,infos$mediators]
+
   i<-0
   for (i in seq_len(nm)) {
     m<-infos$mediators[i]
-    where<-which(PAT[,m]==1)
+    where<-which(PAT[,m]!="0")
     if (length(where)>0) {
       M[m,"x"]<-M[m,"x"]-shiftmed*(nm^2-i^2)
       M[names(where),"x"]<-M[names(where),"x"]+.05

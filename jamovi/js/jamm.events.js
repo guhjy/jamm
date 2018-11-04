@@ -152,7 +152,7 @@ var fromSupplierToMediatorsTerms= function(ui,context) {
      // we remove the independent variables removed from the ui, if any
     if (diff.removed.length>0)
         light = removeFromMultiList(diff.removed,light,context,1);
-    
+    log(light)
     ui.mediatorsTerms.setValue(light);    
     labelize(ui.mediatorsTerms,mediators, "Mediator");  
     storeComponent("mediatorsTerms",light,context);
@@ -164,16 +164,19 @@ var fromMediatorsTerms= function(ui,context) {
     var mediators = context.cloneArray(ui.mediators.value(), []);
     var mediatorsTerms = context.cloneArray(ui.mediatorsTerms.value(),[]);
     var moderatorsTerms= context.cloneArray(ui.moderatorsTerms.value(),[]);
+       log ("frommed")
+       log(mediatorsTerms)
 
     for (var i = 0; i < mediators.length; i++)
         mediatorsTerms[i]=removeFromList(mediators[i],mediatorsTerms[i],context,1);
     
     var diff=findChangesMulti("mediatorsTerms",mediatorsTerms,context);
-    if (diff.index>-1) {
+    if (diff.index>-1 && diff.index<mediatorsTerms.length) {
          moderatorsTerms[diff.index]=removeFromList(diff.changes[diff.index].removed,moderatorsTerms[diff.index],context,1) ;
          mediatorsTerms[diff.index]=removeFromList(diff.changes[diff.index].removed,mediatorsTerms[diff.index],context,1) ;
        }
-
+       log ("frommed2")
+       log(mediatorsTerms)
         ui.mediatorsTerms.setValue(mediatorsTerms);
         ui.moderatorsTerms.setValue(moderatorsTerms);
         isRoomForModerators(ui,context)
@@ -470,6 +473,7 @@ var ssort= function(str){
 }
 
 var labelize = function(widget, labels, prefix) {
+
      widget.applyToItems(0, (item, index) => {
            item.controls[0].setPropertyValue("label",prefix +" = "+labels[index]);
         });
