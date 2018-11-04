@@ -1,7 +1,7 @@
 Package: jamm
 Type: Package
 Title: Advanced Mediational Models
-Version: 0.0.2
+Version: 0.0.3
 Author: Marcello Gallucci
 Maintainer: Marcello Gallucci <mcfanda@gmail.com>
 Description: A suite for estimation of mediational models, including multiple mediators, and conditional mediation

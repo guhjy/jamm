@@ -40,48 +40,24 @@ jammGLMClass <- R6::R6Class(
       private$.infos<-infos
       ## prepare main result table
       table<-self$results$models$main
-      table$getColumn('ci.lower')$setSuperTitle(jmvcore::format('{}% C.I. (a)', ciWidth))
-      table$getColumn('ci.upper')$setSuperTitle(jmvcore::format('{}% C.I. (a)', ciWidth))
-      for (i in seq_along(infos$ieffects)) {
-        ie <- infos$ieffects[[i]]
-        rowKey=paste0(ie,collapse = "_")
-        aRow=list(source=.nicifychain64(ie,private$.names64),type="Indirect")
-        table$addRow(rowKey=rowKey,aRow)
-        table$addFormat(rowKey=rowKey, col=1, jmvcore::Cell.BEGIN_GROUP)
-        for (j in seq_len(length(ie)-1)) {
-          value=c(ie[[j]],ie[[j+1]])
-          rowKey <- paste0(value,collapse = "_")
-          row<-list(source=.nicifychain64(value,private$.names64),type="Component")
-          table$addRow(rowKey=rowKey,row)
-          n<-length(table$rowKeys)
-          table$addFormat(rowNo=n, col=2, jmvcore::Cell.INDENTED)
-        }
-        }
-        table$addFormat(rowKey=rowKey, col=1, jmvcore::Cell.END_GROUP)
-      
-      for (te in infos$totaleffects) {
-        rowKey=paste0(te,collapse = "_")
-        row<-list(source=.nicifychain64(te,private$.names64),type="Direct")
-        table$addRow(rowKey,row)
-      }
-      table$addFormat(rowKey=paste0(infos$totaleffects[[1]],collapse = "_"),col=1,jmvcore::Cell.BEGIN_GROUP)
-        
-      for (te in infos$totaleffects) {
-          rowKey=paste0(te,collapse = "_t_")
-          row<-list(source=.nicifychain64(te,private$.names64),type="Total")
-          table$addRow(rowKey,row)
-        }
-        table$addFormat(rowKey=paste0(infos$totaleffects[[1]],collapse = "_t_"),col=1,jmvcore::Cell.BEGIN_GROUP)
-        
-      if (is.something(infos$moderators))
-          table$setTitle("Indirect and Total Effects (averaged across moderators)")
-      
-      add<-ifelse(ciType=="standard" || ciType=="none","",". This may take a while")
-      .note<-paste0(NOTES[["ci"]][[ciType]],add)
-      table$setNote("cinote",paste("(a) Confidence intervals computed with method:",.note))
-      
+      mr.initTable(infos,table,private$.names64,ciType,ciWidth)
+
       if  (is.something(self$options$factors))   
-         mi.initContrastCode(data,self$options,self$results,private$.names64)
+        mi.initContrastCode(data,self$options,self$results,private$.names64)
+
+        if (is.something(infos$moderators)) {
+           table$setTitle("Indirect and Total Effects (averaged across moderators)")
+        
+         for (i in seq_along(infos$moderators)) {
+              mod<-infos$moderators[i]
+              labels<-private$.cov_condition$labels(mod,decode=T)
+              for (i in seq_along(labels)) {
+                key<-paste(jmvcore::fromB64(mod),labels[i],sep = "=")
+                aTable<-self$results$simplemodels$addItem(key=key)
+                mr.initTable(infos,aTable,private$.names64,ciType,ciWidth)
+          }
+        }
+      }
       
     },
     .run=function() {
@@ -114,14 +90,13 @@ jammGLMClass <- R6::R6Class(
       }
 
       if (!is.null(covs)) {
-        private$.cov_condition$storeValues(data)
+        private$.cov_condition$storeValues(data,decode=TRUE)
         private$.cov_condition$labels_type=self$options$simpleScaleLabels
       }
       ## fill main mediational results
       ## notice that jmf.modelSummaries return first the individual coefficients
       ## and then the mediated effect. Because in .init the mediated effec is defined ad
       ## the first row, it format the table well because it uses the rowKey appropriately
-      mark(str(infos))
       if (!infos$isEstimable())
          return()
       
@@ -135,8 +110,27 @@ jammGLMClass <- R6::R6Class(
       if (dim(row)[1]>0)
          table$setRow(rowKey=rowKey,row)
       }
-      totals<-jmf.mediationTotal(infos,data,ciWidth)
-      
+      for (i in seq_along(infos$moderators)) {
+       mod<-infos$moderators[i]
+       values<-private$.cov_condition$values(mod,decode=T)
+       labels<-private$.cov_condition$labels(mod,decode=T)
+       for (i in seq_along(labels)) {
+         key<-paste(jmvcore::fromB64(mod),labels[i],sep = "=")
+         table<-self$results$simplemodels$get(key=key)
+         value<-values[[1]][i]
+         mark(key)
+         mark(value)
+         ldata<-data
+         ldata[,mod]<-ldata[,mod]-value
+         params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
+         for (rowKey in table$rowKeys) {
+           row<-params[params$label==rowKey,]
+           if (dim(row)[1]>0)
+             table$setRow(rowKey=rowKey,row)
+         }
+         
+       }
+       }
     },
   .cleandata=function() {
       n64<-private$.names64
@@ -182,7 +176,12 @@ jammGLMClass <- R6::R6Class(
         data[[jmvcore::toB64(covariate)]] <- jmvcore::toNumeric(dataRaw[[covariate]])
         n64$addVar(covariate)
       }
-      
+      ### initialize conditioning of covariates
+      if (!is.null(self$options$covs)) {
+        span<-ifelse(self$options$simpleScale=="mean_sd",self$options$cvalue,self$options$percvalue)
+        private$.cov_condition<-conditioning$new(self$options$covs,self$options$simpleScale,span)
+      }
+      #####################
       for (med in mediators) {
         data[[jmvcore::toB64(med)]] <- jmvcore::toNumeric(dataRaw[[med]])
         n64$addVar(med)

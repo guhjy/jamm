@@ -262,7 +262,8 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
     active = list(
         info = function() private$.items[["info"]],
         pathmodelgroup = function() private$.items[["pathmodelgroup"]],
-        models = function() private$.items[["models"]]),
+        models = function() private$.items[["models"]],
+        simplemodels = function() private$.items[["simplemodels"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -524,7 +525,66 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     `name`="p", 
                                     `title`="p", 
                                     `type`="number", 
-                                    `format`="zto,pvalue"))))}))$new(options=options))}))
+                                    `format`="zto,pvalue"))))}))$new(options=options))
+            self$add(jmvcore::Array$new(
+                options=options,
+                name="simplemodels",
+                title="Conditional Mediation",
+                clearWith=list(
+                    "dep",
+                    "modelTerms",
+                    "contrasts",
+                    "scaling",
+                    "fixedIntercept",
+                    "effectSize"),
+                template=jmvcore::Table$new(
+                    options=options,
+                    title="Indirect and direct effects computed for $key",
+                    columns=list(
+                        list(
+                            `name`="type", 
+                            `title`="Type", 
+                            `type`="text", 
+                            `combineBelow`=TRUE),
+                        list(
+                            `name`="source", 
+                            `title`="Effect", 
+                            `type`="text"),
+                        list(
+                            `name`="label", 
+                            `title`="Contrasts", 
+                            `visible`=FALSE, 
+                            `type`="text"),
+                        list(
+                            `name`="est", 
+                            `title`="Estimate", 
+                            `type`="number"),
+                        list(
+                            `name`="se", 
+                            `title`="SE", 
+                            `type`="number"),
+                        list(
+                            `name`="ci.lower", 
+                            `type`="number", 
+                            `title`="Lower"),
+                        list(
+                            `name`="ci.upper", 
+                            `type`="number", 
+                            `title`="Upper"),
+                        list(
+                            `name`="std.all", 
+                            `type`="number", 
+                            `title`="\u03B2", 
+                            `visible`="(effectSize:beta)"),
+                        list(
+                            `name`="z", 
+                            `title`="z", 
+                            `type`="number"),
+                        list(
+                            `name`="pvalue", 
+                            `title`="p", 
+                            `type`="number", 
+                            `format`="zto,pvalue")))))}))
 
 jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jammGLMBase",
@@ -599,6 +659,7 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$models$contrastCodeTables} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #'   \code{results$models$medmodels} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #'   \code{results$models$fullmodel} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$simplemodels} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

@@ -43,8 +43,6 @@ jmf.mediationTotal <-
         ind<-lapply(model$ind, function(x) if(!any(x %in% meds)) x)
         model$ind<-ind[!(sapply(ind, is.null))]
         .formula<-.modelFormula(model,"_t_")
-        mark("totals",model$ind)
-        mark(.formula)
         fit<-try(lavaan::sem(.formula,data = data))
         if (jmvcore::isError(fit)) {
             msg <- jmvcore::extractErrorMessage(fit)
