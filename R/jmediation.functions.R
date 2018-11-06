@@ -26,7 +26,7 @@ jmf.mediationSummary <-
       msg <- jmvcore::extractErrorMessage(fit)
       if (is.something(grep("definite", msg)))
         jmvcore::reject(
-          "The model cannot be estimated. Please check whether the independent variables are highly correlated or the model is ill-defined"
+          "The model cannot be estimated. Please check whether the independent variables are very highly correlated or the model is ill-defined"
         )
       else
         jmvcore::reject(msg)
@@ -47,7 +47,7 @@ jmf.mediationTotal <-
         if (jmvcore::isError(fit)) {
             msg <- jmvcore::extractErrorMessage(fit)
             if (is.something(grep("definite", msg)))
-                    jmvcore::reject("The model cannot be estimated. Please check whether the independent variables are highly correlated or the model is ill-defined")
+                    jmvcore::reject("The model cannot be estimated. Please check whether the independent variables are very highly correlated or the model is ill-defined")
       
         }
         table<-lavaan::parameterestimates(
@@ -81,7 +81,9 @@ jmf.mediationTable <- function(
                 bootN=bootN) {
   fit<-jmf.mediationSummary(infos,data, se=se,bootN=bootN)
   params<-jmf.mediationInference(fit,level=level,boot.ci =boot.ci)
+  params$model<-"med"
   totals<-jmf.mediationTotal(infos,data,level)
+  totals$model<-"tot"
   mtable<-rbind(params,totals)
   mtable
 }

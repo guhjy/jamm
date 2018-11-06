@@ -39,25 +39,23 @@ jammGLMClass <- R6::R6Class(
       infos<-smartMediation$new(meds,full,moderators = mods)
       private$.infos<-infos
       ## prepare main result table
-      table<-self$results$models$main
-      mr.initTable(infos,table,private$.names64,ciType,ciWidth)
-
+      if (!is.something(infos$moderators)) {
+             table<-self$results$models$main
+             mr.initTable(infos,table,private$.names64,ciType,ciWidth)
+      }
       if  (is.something(self$options$factors))   
-        mi.initContrastCode(data,self$options,self$results,private$.names64)
+          mi.initContrastCode(data,self$options,self$results,private$.names64)
 
         if (is.something(infos$moderators)) {
-           table$setTitle("Indirect and Total Effects (averaged across moderators)")
-
-         moderators<-unique(unlist(sapply(infos$moderators,private$.names64$factorName)))
+           moderators<-unique(unlist(sapply(infos$moderators,private$.names64$factorName)))
 
          for (i in seq_along(moderators)) {
               mod<-infos$moderators[i]
               mod<-private$.names64$factorName(mod)
               labels<-private$.cov_condition$labels(mod)
-              mark(labels)
               for (i in seq_along(labels)) {
                 key<-paste(mod,labels[i],sep = "=")
-                aTable<-self$results$simplemodels$addItem(key=key)
+                aTable<-self$results$moderation$simplemodels$addItem(key=key)
                 mr.initTable(infos,aTable,private$.names64,ciType,ciWidth)
           }
         }
@@ -103,42 +101,63 @@ jammGLMClass <- R6::R6Class(
       ## the first row, it format the table well because it uses the rowKey appropriately
       if (!infos$isEstimable())
          return()
-      
-      table<-self$results$models$main
       se<-ifelse(ciType=="standard" || ciType=="none",ciType,"bootstrap")
       params<-jmf.mediationTable(infos,data,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
 
-      table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
-      for (rowKey in table$rowKeys) {
-      row<-params[params$label==rowKey,]
-      if (dim(row)[1]>0)
-         table$setRow(rowKey=rowKey,row)
-      }
-      moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
-      for (i in seq_along(moderators)) {
-       mod<-moderators[i]
-       values<-private$.cov_condition$values(mod)
-       labels<-private$.cov_condition$labels(mod)
-       mod64<-jmvcore::toB64(mod)
+      if (!is.something(infos$moderators)) {
+           table<-self$results$models$main
+           table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
+           for (rowKey in table$rowKeys) {
+               row<-params[params$label==rowKey,]
+               if (dim(row)[1]>0)
+                  table$setRow(rowKey=rowKey,row)
+           table$setVisible(TRUE)
+           self$results$models$setTitle("Mediation")
+           }
+      } else {
+              self$results$moderation$setTitle("Conditional Mediation")
+              modtable<-self$results$moderation$moderationEffects
+              modtable$setVisible(TRUE)
+              moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
+              for (i in seq_along(moderators)) {
+                  mod<-moderators[i]
+                  values<-private$.cov_condition$values(mod)
+                  labels<-private$.cov_condition$labels(mod)
+                  mod64<-jmvcore::toB64(mod)
        
-       for (i in seq_along(labels)) {
-         key<-paste(mod,labels[i],sep = "=")
-         table<-self$results$simplemodels$get(key=key)
-         ldata<-data
-         condata<-private$.cov_condition$center(mod,ldata,i)
-         mark(head(condata))
-         for (var in names(condata)) {
-             ldata[,var]<-condata[,var]
-         }
+              for (i in seq_along(labels)) {
+                  key<-paste(mod,labels[i],sep = "=")
+                  table<-self$results$moderation$simplemodels$get(key=key)
+                  ldata<-data
+                  condata<-private$.cov_condition$center(mod,ldata,i)
+                  for (var in names(condata)) {
+                       ldata[,var]<-condata[,var]
+                  }
 
-         params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
-         for (rowKey in table$rowKeys) {
-           row<-params[params$label==rowKey,]
-           if (dim(row)[1]>0)
-             table$setRow(rowKey=rowKey,row)
-         }
+                params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
+                for (rowKey in table$rowKeys) {
+                    row<-params[params$label==rowKey,]
+                    if (dim(row)[1]>0)
+                          table$setRow(rowKey=rowKey,row)
+                }
          
-       }
+              }
+               itable<-params[(params$op=="~" & params$model=="med"),]
+               where<-grep(mod64,itable$rhs, fixed=T)
+               itable<-itable[where,]
+               where<-grep(":",itable$rhs, fixed=T)
+               itable<-itable[where,]
+               for (i in 1:nrow(itable)) {
+                   row<-itable[i,]
+                   row$mod=mod
+                   w<-strsplit(row$rhs,":")[[1]]
+                   w<-w[(w!=mod64)]
+                   target<-jmvcore::fromB64(w)
+                   row$target<-.nicifychain(c(target,jmvcore::fromB64(row$lhs)))
+                   rowKey<-paste(row$lhs,row$rhs,sep="_")
+                   modtable$addRow(rowKey=rowKey,row) 
+               }
+              }
        }
     },
   .cleandata=function() {
