@@ -3,6 +3,10 @@
 jamovi Advanced Mediation Models 
 version 0.0.4
 
+# Docs and help
+
+Please visit the [jAMM docs page](https://mcfanda.github.io/jamm_docs/index.html)
+
 # State of the art
 
 * It makes the path model
