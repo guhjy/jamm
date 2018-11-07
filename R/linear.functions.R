@@ -8,7 +8,7 @@
   data
 }
 
-lf.createContrasts=function(levels, type) {
+lf.createContrasts=function(levels, type, base=0) {
   
   nLevels <- length(levels)
 
@@ -58,9 +58,9 @@ lf.createContrasts=function(levels, type) {
 
   } else if (type == 'dummy') {
 
-    contrast <- stats::contr.treatment(levels)
+    contrast <- stats::contr.treatment(levels,base = base)
     dimnames(contrast) <- NULL
-    
+    mark(contrast)
   } else {
       contrast <- matrix(0, nrow=nLevels, ncol=nLevels-1)
       for (i in seq_len(nLevels-1)) {

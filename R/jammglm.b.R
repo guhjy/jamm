@@ -39,21 +39,23 @@ jammGLMClass <- R6::R6Class(
       infos<-smartMediation$new(meds,full,moderators = mods)
       private$.infos<-infos
       ## prepare main result table
-      table<-self$results$models$main
-      mr.initTable(infos,table,private$.names64,ciType,ciWidth)
-
+      if (!is.something(infos$moderators)) {
+             table<-self$results$models$main
+             mr.initTable(infos,table,private$.names64,ciType,ciWidth)
+      }
       if  (is.something(self$options$factors))   
-        mi.initContrastCode(data,self$options,self$results,private$.names64)
+          mi.initContrastCode(data,self$options,self$results,private$.names64)
 
         if (is.something(infos$moderators)) {
-           table$setTitle("Indirect and Total Effects (averaged across moderators)")
-        
-         for (i in seq_along(infos$moderators)) {
+           moderators<-unique(unlist(sapply(infos$moderators,private$.names64$factorName)))
+
+         for (i in seq_along(moderators)) {
               mod<-infos$moderators[i]
-              labels<-private$.cov_condition$labels(mod,decode=T)
+              mod<-private$.names64$factorName(mod)
+              labels<-private$.cov_condition$labels(mod)
               for (i in seq_along(labels)) {
-                key<-paste(jmvcore::fromB64(mod),labels[i],sep = "=")
-                aTable<-self$results$simplemodels$addItem(key=key)
+                key<-paste(mod,labels[i],sep = "=")
+                aTable<-self$results$moderation$simplemodels$addItem(key=key)
                 mr.initTable(infos,aTable,private$.names64,ciType,ciWidth)
           }
         }
@@ -99,37 +101,63 @@ jammGLMClass <- R6::R6Class(
       ## the first row, it format the table well because it uses the rowKey appropriately
       if (!infos$isEstimable())
          return()
-      
-      table<-self$results$models$main
       se<-ifelse(ciType=="standard" || ciType=="none",ciType,"bootstrap")
       params<-jmf.mediationTable(infos,data,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
 
-      table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
-      for (rowKey in table$rowKeys) {
-      row<-params[params$label==rowKey,]
-      if (dim(row)[1]>0)
-         table$setRow(rowKey=rowKey,row)
-      }
-      for (i in seq_along(infos$moderators)) {
-       mod<-infos$moderators[i]
-       values<-private$.cov_condition$values(mod,decode=T)
-       labels<-private$.cov_condition$labels(mod,decode=T)
-       for (i in seq_along(labels)) {
-         key<-paste(jmvcore::fromB64(mod),labels[i],sep = "=")
-         table<-self$results$simplemodels$get(key=key)
-         value<-values[[1]][i]
-         mark(key)
-         mark(value)
-         ldata<-data
-         ldata[,mod]<-ldata[,mod]-value
-         params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
-         for (rowKey in table$rowKeys) {
-           row<-params[params$label==rowKey,]
-           if (dim(row)[1]>0)
-             table$setRow(rowKey=rowKey,row)
-         }
+      if (!is.something(infos$moderators)) {
+           table<-self$results$models$main
+           table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
+           for (rowKey in table$rowKeys) {
+               row<-params[params$label==rowKey,]
+               if (dim(row)[1]>0)
+                  table$setRow(rowKey=rowKey,row)
+           table$setVisible(TRUE)
+           self$results$models$setTitle("Mediation")
+           }
+      } else {
+              self$results$moderation$setTitle("Conditional Mediation")
+              modtable<-self$results$moderation$moderationEffects
+              modtable$setVisible(TRUE)
+              moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
+              for (i in seq_along(moderators)) {
+                  mod<-moderators[i]
+                  values<-private$.cov_condition$values(mod)
+                  labels<-private$.cov_condition$labels(mod)
+                  mod64<-jmvcore::toB64(mod)
+       
+              for (i in seq_along(labels)) {
+                  key<-paste(mod,labels[i],sep = "=")
+                  table<-self$results$moderation$simplemodels$get(key=key)
+                  ldata<-data
+                  condata<-private$.cov_condition$center(mod,ldata,i)
+                  for (var in names(condata)) {
+                       ldata[,var]<-condata[,var]
+                  }
+
+                params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
+                for (rowKey in table$rowKeys) {
+                    row<-params[params$label==rowKey,]
+                    if (dim(row)[1]>0)
+                          table$setRow(rowKey=rowKey,row)
+                }
          
-       }
+              }
+               itable<-params[(params$op=="~" & params$model=="med"),]
+               where<-grep(mod64,itable$rhs, fixed=T)
+               itable<-itable[where,]
+               where<-grep(":",itable$rhs, fixed=T)
+               itable<-itable[where,]
+               for (i in 1:nrow(itable)) {
+                   row<-itable[i,]
+                   row$mod=mod
+                   w<-strsplit(row$rhs,":")[[1]]
+                   w<-w[(w!=mod64)]
+                   target<-jmvcore::fromB64(w)
+                   row$target<-.nicifychain(c(target,jmvcore::fromB64(row$lhs)))
+                   rowKey<-paste(row$lhs,row$rhs,sep="_")
+                   modtable$addRow(rowKey=rowKey,row) 
+               }
+              }
        }
     },
   .cleandata=function() {
@@ -141,31 +169,6 @@ jammGLMClass <- R6::R6Class(
 
       dataRaw <- self$data
       data <- list()
-      for (factor in factors) {
-        ### we need this for Rinterface ####
-        if (!("factor" %in% class(dataRaw[[factor]]))) {
-          info(paste("Warning, variable",factor," has been coerced to factor"))
-          dataRaw[[factor]]<-factor(dataRaw[[factor]])
-        }
-        data[[jmvcore::toB64(factor)]] <- dataRaw[[factor]]
-        levels <- base::levels(data[[jmvcore::toB64(factor)]])
-        stats::contrasts(data[[jmvcore::toB64(factor)]]) <- lf.createContrasts(levels,"deviation")
-        n64$addFactor(factor,levels)
-        n64$addLabel(factor,lf.contrastLabels(levels, "deviation")) 
-        attr(data[[jmvcore::toB64(factor)]],"jcontrast")<-"deviation"
-      }
-      
-      for (contrast in self$options$contrasts) {
-        levels <- base::levels(data[[jmvcore::toB64(contrast$var)]])
-        stats::contrasts(data[[jmvcore::toB64(contrast$var)]]) <- lf.createContrasts(levels, contrast$type)
-        n64$addLabel(contrast$var,lf.contrastLabels(levels, contrast$type)) 
-        attr(data[[jmvcore::toB64(contrast$var)]],"jcontrast")<-contrast$type
-        dummies<-model.matrix(as.formula(paste0("~",jmvcore::toB64(contrast$var))),data=data)
-        dummies<-dummies[,-1]
-        dummies<-data.frame(dummies)
-        names(dummies)<-unlist(n64$contrasts(contrast$var))
-        data<-cbind(data,dummies)
-      }
       
       if ( ! is.null(dep)) {
         data[[jmvcore::toB64(dep)]] <- jmvcore::toNumeric(dataRaw[[dep]])
@@ -185,6 +188,33 @@ jammGLMClass <- R6::R6Class(
       for (med in mediators) {
         data[[jmvcore::toB64(med)]] <- jmvcore::toNumeric(dataRaw[[med]])
         n64$addVar(med)
+      }
+
+      for (factor in factors) {
+        ### we need this for Rinterface ####
+        if (!("factor" %in% class(dataRaw[[factor]]))) {
+          info(paste("Warning, variable",factor," has been coerced to factor"))
+          dataRaw[[factor]]<-factor(dataRaw[[factor]])
+        }
+        data[[jmvcore::toB64(factor)]] <- dataRaw[[factor]]
+        levels <- base::levels(data[[jmvcore::toB64(factor)]])
+        stats::contrasts(data[[jmvcore::toB64(factor)]]) <- lf.createContrasts(levels,"deviation")
+        n64$addFactor(factor,levels)
+        n64$addLabel(factor,lf.contrastLabels(levels, "deviation")) 
+        attr(data[[jmvcore::toB64(factor)]],"jcontrast")<-"deviation"
+        private$.cov_condition$addFactor(factor,levels)
+      }
+      
+      for (contrast in self$options$contrasts) {
+        levels <- base::levels(data[[jmvcore::toB64(contrast$var)]])
+        stats::contrasts(data[[jmvcore::toB64(contrast$var)]]) <- lf.createContrasts(levels, contrast$type)
+        n64$addLabel(contrast$var,lf.contrastLabels(levels, contrast$type)) 
+        attr(data[[jmvcore::toB64(contrast$var)]],"jcontrast")<-contrast$type
+        dummies<-model.matrix(as.formula(paste0("~",jmvcore::toB64(contrast$var))),data=data)
+        dummies<-dummies[,-1]
+        dummies<-data.frame(dummies)
+        names(dummies)<-unlist(n64$contrasts(contrast$var))
+        data<-cbind(data,dummies)
       }
       
       private$.names64<-n64
@@ -233,7 +263,7 @@ jammGLMClass <- R6::R6Class(
   infos<-smartMediation$new(medmodels64,fullmodel64,moderators = modTerms64)
   #### prepare the diagram
   image <- self$results$pathmodelgroup$get('pathmodel')
-  paths<-diag.paths(infos,suggested = T)
+  paths<-diag.paths(infos,suggested = T,shiftmed=.01)
 
   # for (i in seq_along(paths$labs))
   #         if (paths$labs[[i]] %in% factors) {

@@ -263,7 +263,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
         info = function() private$.items[["info"]],
         pathmodelgroup = function() private$.items[["pathmodelgroup"]],
         models = function() private$.items[["models"]],
-        simplemodels = function() private$.items[["simplemodels"]]),
+        moderation = function() private$.items[["moderation"]]),
     private = list(),
     public=list(
         initialize=function(options) {
@@ -312,7 +312,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         self$add(jmvcore::Image$new(
                             options=options,
                             name="pathmodel",
-                            title="Diagram",
+                            title="Model Diagram",
                             width=600,
                             height=500,
                             renderFun=".showDiagram",
@@ -330,7 +330,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 list(
                                     `name`="info", 
                                     `type`="text", 
-                                    `title`="Path model notes"))))}))$new(options=options))
+                                    `title`="Model diagram notes"))))}))$new(options=options))
             self$add(R6::R6Class(
                 inherit = jmvcore::Group,
                 active = list(
@@ -344,12 +344,12 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                         super$initialize(
                             options=options,
                             name="models",
-                            title="Mediation")
+                            title="")
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="main",
                             title="Indirect and Total Effects",
-                            visible=TRUE,
+                            visible=FALSE,
                             clearWith=list(
                                 "dep",
                                 "modelTerms",
@@ -526,65 +526,133 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     `title`="p", 
                                     `type`="number", 
                                     `format`="zto,pvalue"))))}))$new(options=options))
-            self$add(jmvcore::Array$new(
-                options=options,
-                name="simplemodels",
-                title="Conditional Mediation",
-                clearWith=list(
-                    "dep",
-                    "modelTerms",
-                    "contrasts",
-                    "scaling",
-                    "fixedIntercept",
-                    "effectSize"),
-                template=jmvcore::Table$new(
-                    options=options,
-                    title="Indirect and direct effects computed for $key",
-                    columns=list(
-                        list(
-                            `name`="type", 
-                            `title`="Type", 
-                            `type`="text", 
-                            `combineBelow`=TRUE),
-                        list(
-                            `name`="source", 
-                            `title`="Effect", 
-                            `type`="text"),
-                        list(
-                            `name`="label", 
-                            `title`="Contrasts", 
-                            `visible`=FALSE, 
-                            `type`="text"),
-                        list(
-                            `name`="est", 
-                            `title`="Estimate", 
-                            `type`="number"),
-                        list(
-                            `name`="se", 
-                            `title`="SE", 
-                            `type`="number"),
-                        list(
-                            `name`="ci.lower", 
-                            `type`="number", 
-                            `title`="Lower"),
-                        list(
-                            `name`="ci.upper", 
-                            `type`="number", 
-                            `title`="Upper"),
-                        list(
-                            `name`="std.all", 
-                            `type`="number", 
-                            `title`="\u03B2", 
-                            `visible`="(effectSize:beta)"),
-                        list(
-                            `name`="z", 
-                            `title`="z", 
-                            `type`="number"),
-                        list(
-                            `name`="pvalue", 
-                            `title`="p", 
-                            `type`="number", 
-                            `format`="zto,pvalue")))))}))
+            self$add(R6::R6Class(
+                inherit = jmvcore::Group,
+                active = list(
+                    moderationEffects = function() private$.items[["moderationEffects"]],
+                    simplemodels = function() private$.items[["simplemodels"]]),
+                private = list(),
+                public=list(
+                    initialize=function(options) {
+                        super$initialize(
+                            options=options,
+                            name="moderation",
+                            title="")
+                        self$add(jmvcore::Table$new(
+                            options=options,
+                            name="moderationEffects",
+                            title="Moderation effects (interations)",
+                            visible=FALSE,
+                            clearWith=list(
+                                "dep",
+                                "modelTerms",
+                                "contrasts",
+                                "fixedIntercept",
+                                "simpleScale"),
+                            columns=list(
+                                list(
+                                    `name`="mod", 
+                                    `title`="Moderator", 
+                                    `combineBelow`=TRUE, 
+                                    `type`="text"),
+                                list(
+                                    `name`="target", 
+                                    `title`="Moderated Effect", 
+                                    `type`="text"),
+                                list(
+                                    `name`="label", 
+                                    `title`="Contrasts", 
+                                    `visible`=FALSE, 
+                                    `type`="text"),
+                                list(
+                                    `name`="est", 
+                                    `title`="Estimate", 
+                                    `type`="number"),
+                                list(
+                                    `name`="se", 
+                                    `title`="SE", 
+                                    `type`="number"),
+                                list(
+                                    `name`="ci.lower", 
+                                    `type`="number", 
+                                    `title`="Lower"),
+                                list(
+                                    `name`="ci.upper", 
+                                    `type`="number", 
+                                    `title`="Upper"),
+                                list(
+                                    `name`="std.all", 
+                                    `type`="number", 
+                                    `title`="\u03B2", 
+                                    `visible`="(effectSize:beta)"),
+                                list(
+                                    `name`="z", 
+                                    `title`="z", 
+                                    `type`="number"),
+                                list(
+                                    `name`="pvalue", 
+                                    `title`="p", 
+                                    `type`="number", 
+                                    `format`="zto,pvalue"))))
+                        self$add(jmvcore::Array$new(
+                            options=options,
+                            name="simplemodels",
+                            title="Simple Effects",
+                            clearWith=list(
+                                "dep",
+                                "modelTerms",
+                                "contrasts",
+                                "scaling",
+                                "fixedIntercept",
+                                "effectSize"),
+                            template=jmvcore::Table$new(
+                                options=options,
+                                title="Indirect and direct effects computed for $key",
+                                columns=list(
+                                    list(
+                                        `name`="type", 
+                                        `title`="Type", 
+                                        `type`="text", 
+                                        `combineBelow`=TRUE),
+                                    list(
+                                        `name`="source", 
+                                        `title`="Effect", 
+                                        `type`="text"),
+                                    list(
+                                        `name`="label", 
+                                        `title`="Contrasts", 
+                                        `visible`=FALSE, 
+                                        `type`="text"),
+                                    list(
+                                        `name`="est", 
+                                        `title`="Estimate", 
+                                        `type`="number"),
+                                    list(
+                                        `name`="se", 
+                                        `title`="SE", 
+                                        `type`="number"),
+                                    list(
+                                        `name`="ci.lower", 
+                                        `type`="number", 
+                                        `title`="Lower"),
+                                    list(
+                                        `name`="ci.upper", 
+                                        `type`="number", 
+                                        `title`="Upper"),
+                                    list(
+                                        `name`="std.all", 
+                                        `type`="number", 
+                                        `title`="\u03B2", 
+                                        `visible`="(effectSize:beta)"),
+                                    list(
+                                        `name`="z", 
+                                        `title`="z", 
+                                        `type`="number"),
+                                    list(
+                                        `name`="pvalue", 
+                                        `title`="p", 
+                                        `type`="number", 
+                                        `format`="zto,pvalue")))))}))$new(options=options))}))
 
 jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
     "jammGLMBase",
@@ -659,7 +727,8 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{results$models$contrastCodeTables} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #'   \code{results$models$medmodels} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #'   \code{results$models$fullmodel} \tab \tab \tab \tab \tab a table \cr
-#'   \code{results$simplemodels} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
+#'   \code{results$moderation$moderationEffects} \tab \tab \tab \tab \tab a table \cr
+#'   \code{results$moderation$simplemodels} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
 #' }
 #'
 #' Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:

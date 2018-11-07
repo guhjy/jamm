@@ -51,6 +51,12 @@ names64 <- R6Class("names64",list(
                                  paste(b,collapse = ":")    
                                  })
                                  },
+                         factorName=function(var64) {
+                           x<-unlist(strsplit(var64,"_._._",fixed = T))
+                           jmvcore::fromB64(x[1])
+                         },
+                         
+                         
                          contrasts=function(var) {
                            self$.contrasts[[jmvcore::toB64(var)]]
                          },
