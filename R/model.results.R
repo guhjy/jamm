@@ -1,36 +1,50 @@
-mr.initTable<-function(infos,resultsTable,n64,ciType,ciWidth) {
+mr.initTable<-function(infos,resultsTable,n64,ciType,ciWidth,tableOptions) {
 
     resultsTable$getColumn('ci.lower')$setSuperTitle(jmvcore::format('{}% C.I. (a)', ciWidth))
     resultsTable$getColumn('ci.upper')$setSuperTitle(jmvcore::format('{}% C.I. (a)', ciWidth))
-    
-    for (i in seq_along(infos$ieffects)) {
-        ie <- infos$ieffects[[i]]
+    ierecoded<-lapply(infos$ieffects, function(x) gsub(":","____",x))
+    components<-list()
+    for (i in seq_along(ierecoded)) {
+        ie <- ierecoded[[i]]
+        ienames<-infos$ieffects[[i]]
         rowKey=paste0(ie,collapse = "_")
-        aRow=list(source=.nicifychain64(ie,n64),type="Indirect")
+        aRow=list(source=.nicifychain64(ienames,n64),type="Indirect")
         resultsTable$addRow(rowKey=rowKey,aRow)
-        resultsTable$addFormat(rowKey=rowKey, col=1, jmvcore::Cell.BEGIN_GROUP)
+#        resultsTable$addFormat(rowKey=rowKey, col=1, jmvcore::Cell.BEGIN_GROUP)
+        
         for (j in seq_len(length(ie)-1)) {
-           value=c(ie[[j]],ie[[j+1]])
-           rowKey <- paste0(value,collapse = "_")
-           row<-list(source=.nicifychain64(value,n64),type="Component")
-           resultsTable$addRow(rowKey=rowKey,row)
-           n<-length(resultsTable$rowKeys)
-           resultsTable$addFormat(rowNo=n, col=2, jmvcore::Cell.INDENTED)
+          valueName=c(ienames[[j]],ienames[[j+1]])
+          valueKey=c(ie[[j]],ie[[j+1]])
+          crowKey <- paste0(valueKey,collapse = "_")
+          row<-list(source=.nicifychain64(valueName,n64),type="Component")
+          components[[crowKey]]<-row
         }
+        
     }
     resultsTable$addFormat(rowKey=rowKey, col=1, jmvcore::Cell.END_GROUP)
-
-    for (te in infos$totaleffects) {
-        rowKey=paste0(te,collapse = "_")
-        row<-list(source=.nicifychain64(te,n64),type="Direct")
+    if ("component" %in% tableOptions)
+         for (rowKey in names(components)) {
+             resultsTable$addRow(rowKey=rowKey,components[[rowKey]])
+             n<-length(resultsTable$rowKeys)
+             resultsTable$addFormat(rowNo=n, col=2, jmvcore::Cell.INDENTED)
+         }
+    
+    totalrecoded<-lapply(infos$totaleffects, function(x) gsub(":","____",x))
+    
+    for (i in seq_along(totalrecoded)) {
+        teKey<-totalrecoded[[i]]
+        teName<-infos$totaleffects[[i]]
+        rowKey=paste0(teKey,collapse = "_")
+        row<-list(source=.nicifychain64(teName,n64),type="Direct")
         resultsTable$addRow(rowKey,row)
         }
 
     resultsTable$addFormat(rowKey=paste0(infos$totaleffects[[1]],collapse = "_"),col=1,jmvcore::Cell.BEGIN_GROUP)
-
-    for (te in infos$totaleffects) {
-         rowKey=paste0(te,collapse = "_t_")
-         row<-list(source=.nicifychain64(te,n64),type="Total")
+    for (i  in seq_along(totalrecoded)) {
+         teKey<-totalrecoded[[i]]
+         teName<-infos$totaleffects[[i]]
+         rowKey=paste0(teKey,collapse = "_t_")
+         row<-list(source=.nicifychain64(teName,n64),type="Total")
          resultsTable$addRow(rowKey,row)
     }
     resultsTable$addFormat(rowKey=paste0(infos$totaleffects[[1]],collapse = "_t_"),col=1,jmvcore::Cell.BEGIN_GROUP)

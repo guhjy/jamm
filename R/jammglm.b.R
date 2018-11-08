@@ -41,14 +41,17 @@ jammGLMClass <- R6::R6Class(
       ## prepare main result table
       if (!is.something(infos$moderators)) {
              table<-self$results$models$main
-             mr.initTable(infos,table,private$.names64,ciType,ciWidth)
+             mr.initTable(infos,table,private$.names64,ciType,ciWidth,self$options$tableOptions)
       }
       if  (is.something(self$options$factors))   
           mi.initContrastCode(data,self$options,self$results,private$.names64)
 
         if (is.something(infos$moderators)) {
            moderators<-unique(unlist(sapply(infos$moderators,private$.names64$factorName)))
-
+           self$results$moderation$setTitle("Conditional Mediation")
+           self$results$moderation$setVisible(TRUE)
+           self$results$moderation$moderationEffects$setVisible(TRUE)
+           
          for (i in seq_along(moderators)) {
               mod<-infos$moderators[i]
               mod<-private$.names64$factorName(mod)
@@ -56,7 +59,7 @@ jammGLMClass <- R6::R6Class(
               for (i in seq_along(labels)) {
                 key<-paste(mod,labels[i],sep = "=")
                 aTable<-self$results$moderation$simplemodels$addItem(key=key)
-                mr.initTable(infos,aTable,private$.names64,ciType,ciWidth)
+                mr.initTable(infos,aTable,private$.names64,ciType,ciWidth, self$options$tableOptions)
           }
         }
       }
@@ -103,7 +106,6 @@ jammGLMClass <- R6::R6Class(
          return()
       se<-ifelse(ciType=="standard" || ciType=="none",ciType,"bootstrap")
       params<-jmf.mediationTable(infos,data,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
-
       if (!is.something(infos$moderators)) {
            table<-self$results$models$main
            table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
@@ -115,7 +117,6 @@ jammGLMClass <- R6::R6Class(
            self$results$models$setTitle("Mediation")
            }
       } else {
-              self$results$moderation$setTitle("Conditional Mediation")
               modtable<-self$results$moderation$moderationEffects
               modtable$setVisible(TRUE)
               moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
@@ -128,6 +129,7 @@ jammGLMClass <- R6::R6Class(
               for (i in seq_along(labels)) {
                   key<-paste(mod,labels[i],sep = "=")
                   table<-self$results$moderation$simplemodels$get(key=key)
+                  table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
                   ldata<-data
                   condata<-private$.cov_condition$center(mod,ldata,i)
                   for (var in names(condata)) {
@@ -292,6 +294,7 @@ jammGLMClass <- R6::R6Class(
   box.text=.80+(infos$nvars)^-2
   arr.lenght=1/(infos$nvars-1)
   labs<-jmvcore::fromB64(paths$labs)
+  labs<-gsub(">","*",labs,fixed=T)  
   ### first we plot the linear models paths diagram
   plot<-diagram::plotmat(paths$paths, pos=paths$pos, 
                   name= labs,box.size = box.size,
