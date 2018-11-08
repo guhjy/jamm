@@ -110,7 +110,7 @@ items:
                     - name: std.all
                       type: number
                       title: β
-                      visible: (effectSize:beta)
+                      visible: (tableOptions:beta)
                     - name: z
                       title: "z"
                       type: number
@@ -215,7 +215,7 @@ items:
                     - name: beta
                       type: number
                       title: β
-                      visible: (effectSize:beta)
+                      visible: (tableOptions:beta)
                     - name: df
                       title: "df"
                       type: number
@@ -275,7 +275,7 @@ items:
                     - name: std.all
                       type: number
                       title: β
-                      visible: (effectSize:beta)
+                      visible: (tableOptions:beta)
                     - name: z
                       title: "z"
                       type: number
@@ -325,7 +325,7 @@ items:
                     - name: std.all
                       type: number
                       title: β
-                      visible: (effectSize:beta)
+                      visible: (tableOptions:beta)
                     - name: z
                       title: "z"
                       type: number

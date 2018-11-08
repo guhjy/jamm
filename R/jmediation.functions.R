@@ -9,7 +9,8 @@ jmf.mediationSummary <-
     models[[length(models) + 1]] <- infos$original_fullmodel
     formulas <- .modelFormulas(models)
     lavformula <- paste(formulas, collapse = " ; ")
-    for (ie in infos$ieffects) {
+    ierecoded<-lapply(infos$ieffects, function(x) gsub(":","____",x))
+    for (ie in ierecoded) {
       modifiers <- list()
       for (i in 1:(length(ie) - 1))
         modifiers[[i]] <- paste0(ie[i], "_", ie[i + 1])
@@ -98,7 +99,7 @@ jmf.mediationTable <- function(
   dep <- alist$dep
   terms <- sapply(alist$ind, function(a) {
     if (length(a)>1)
-      paste0(a,collapse = ":")
+      paste(paste0(paste0(a,collapse = "____"),sep,dep),paste0(a,collapse = ":"),sep="*")
     else
       paste(paste0(a, sep, dep), a, sep = " * ")
   })

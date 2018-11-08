@@ -290,15 +290,6 @@ children:
         style: inline
         children:
           - type: Label
-            label: Effect Size
-            margin: large
-            style: list
-            children:
-              - name: effectSize_beta
-                type: CheckBox
-                optionPart: beta
-                optionName: effectSize
-          - type: Label
             label: Confidence Intervals
             margin: large
             style: list
@@ -323,7 +314,6 @@ children:
                 name: ciType_none
                 optionName: ciType
                 optionPart: none
-
               - type: TextBox
                 name: ciWidth
                 label: Interval
@@ -334,3 +324,16 @@ children:
                 name: bootN
                 format: number
                 inputPattern: '[0-9]+'
+          - type: Label
+            label: Display in tables
+            margin: large
+            style: list
+            children:
+              - name: tableOptions_component
+                type: CheckBox
+                optionPart: component
+                optionName: tableOptions
+              - name: tableOptions_beta
+                type: CheckBox
+                optionName: tableOptions
+                optionPart: beta

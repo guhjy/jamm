@@ -23,7 +23,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             percvalue = 25,
             simpleScaleLabels = "labels",
             scaling = NULL,
-            effectSize = list(
+            tableOptions = list(
                 "beta"),
             mediatorsTerms = list(
                 list()),
@@ -168,10 +168,11 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "standardized",
                                 "none"),
                             default="centered"))))
-            private$..effectSize <- jmvcore::OptionNMXList$new(
-                "effectSize",
-                effectSize,
+            private$..tableOptions <- jmvcore::OptionNMXList$new(
+                "tableOptions",
+                tableOptions,
                 options=list(
+                    "component",
                     "beta"),
                 default=list(
                     "beta"))
@@ -209,7 +210,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..percvalue)
             self$.addOption(private$..simpleScaleLabels)
             self$.addOption(private$..scaling)
-            self$.addOption(private$..effectSize)
+            self$.addOption(private$..tableOptions)
             self$.addOption(private$..mediatorsTerms)
             self$.addOption(private$..moderatorsTerms)
         }),
@@ -231,7 +232,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         percvalue = function() private$..percvalue$value,
         simpleScaleLabels = function() private$..simpleScaleLabels$value,
         scaling = function() private$..scaling$value,
-        effectSize = function() private$..effectSize$value,
+        tableOptions = function() private$..tableOptions$value,
         mediatorsTerms = function() private$..mediatorsTerms$value,
         moderatorsTerms = function() private$..moderatorsTerms$value),
     private = list(
@@ -252,7 +253,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..percvalue = NA,
         ..simpleScaleLabels = NA,
         ..scaling = NA,
-        ..effectSize = NA,
+        ..tableOptions = NA,
         ..mediatorsTerms = NA,
         ..moderatorsTerms = NA)
 )
@@ -391,7 +392,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     `name`="std.all", 
                                     `type`="number", 
                                     `title`="\u03B2", 
-                                    `visible`="(effectSize:beta)"),
+                                    `visible`="(tableOptions:beta)"),
                                 list(
                                     `name`="z", 
                                     `title`="z", 
@@ -512,7 +513,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     `name`="beta", 
                                     `type`="number", 
                                     `title`="\u03B2", 
-                                    `visible`="(effectSize:beta)"),
+                                    `visible`="(tableOptions:beta)"),
                                 list(
                                     `name`="df", 
                                     `title`="df", 
@@ -584,7 +585,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                     `name`="std.all", 
                                     `type`="number", 
                                     `title`="\u03B2", 
-                                    `visible`="(effectSize:beta)"),
+                                    `visible`="(tableOptions:beta)"),
                                 list(
                                     `name`="z", 
                                     `title`="z", 
@@ -643,7 +644,7 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                         `name`="std.all", 
                                         `type`="number", 
                                         `title`="\u03B2", 
-                                        `visible`="(effectSize:beta)"),
+                                        `visible`="(tableOptions:beta)"),
                                     list(
                                         `name`="z", 
                                         `title`="z", 
@@ -713,7 +714,7 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' @param scaling a list of lists specifying the covariates scaling, one of
 #'   \code{'centered to the mean'}, \code{'standardized'}, or \code{'none'}.
 #'   \code{'none'} leaves the variable as it is
-#' @param effectSize .
+#' @param tableOptions .
 #' @param mediatorsTerms a list of lists specifying the models for with the
 #'   mediators as dependent variables.
 #' @param moderatorsTerms a list of lists specifying the the IV which
@@ -757,7 +758,7 @@ jammGLM <- function(
     percvalue = 25,
     simpleScaleLabels = "labels",
     scaling = NULL,
-    effectSize = list(
+    tableOptions = list(
                 "beta"),
     mediatorsTerms = list(
                 list()),
@@ -793,7 +794,7 @@ jammGLM <- function(
         percvalue = percvalue,
         simpleScaleLabels = simpleScaleLabels,
         scaling = scaling,
-        effectSize = effectSize,
+        tableOptions = tableOptions,
         mediatorsTerms = mediatorsTerms,
         moderatorsTerms = moderatorsTerms)
 

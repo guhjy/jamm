@@ -161,7 +161,6 @@ smartMediation <- R6Class("smartMediation",
                          for (j in seq_along(models[[i]]$ind)) 
                            models[[i]]$ind[[j]]<-paste0(models[[i]]$ind[[j]],collapse =":")
 
-                     
                     self$medmodels<-models[-length(models)]
                     self$fullmodel<-models[[length(models)]]
                     
@@ -319,6 +318,10 @@ smartMediation <- R6Class("smartMediation",
   xList<-list()
   k<-0
   meds<-infos$original_medmodels
+  for (i in seq_along(meds))
+      for (j in seq_along(meds[[i]]$ind))
+          meds[[i]]$ind[[j]]<-paste(meds[[i]]$ind[[j]], collapse = ":")
+
   for (v in infos$independents) {
     where<-grep(v,meds,fixed = T)
     for (i in where) {

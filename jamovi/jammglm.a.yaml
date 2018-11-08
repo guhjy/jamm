@@ -243,10 +243,12 @@ options:
 
 ######### specs here ##########
 
-    - name: effectSize
-      title: Effect Size
+    - name: tableOptions
+      title: Display
       type: NMXList
       options:
+          - name: component
+            title: IE Components
           - name: beta
             title: β  
       default:
