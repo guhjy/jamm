@@ -45,11 +45,4 @@ jmvtools::install(pkg=pkg)
 
 ```
 
-If you are on linux and you are working with flatpak jamovi, you need to issue 
-  
-```r
-devtools::install_github("mcfanda/jamm")
-pkg<-paste0(.libPaths()[[1]],"jamm")
-jmvtools::install(pkg=pkg, home="flatpak")
 
-```
