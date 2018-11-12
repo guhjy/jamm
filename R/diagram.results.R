@@ -155,14 +155,13 @@ ds.modelInfo <- function(infos, self, n64) {
         value = modelFormulas[[n]]
       )
     )
-    chains <- infos$mod_ieffects
+    chains <- infos$ieffects
     nc <- 0
     infoTable$addRow(rowKey = "ielabel", list(
       info = "Indirect Effects",
       specs = "",
       value = ""
     ))
-    
     for (chain in chains) {
       nc <- nc + 1
       specs <- paste0("IE ", nc)
@@ -191,7 +190,7 @@ ds.modelInfo <- function(infos, self, n64) {
                        list(
                          info = "",
                          specs = paste("path", i),
-                         value = .nicifychain(infos$impossibles[[i]])
+                         value = .nicifychain(jmvcore::fromB64(infos$impossibles[[i]]))
                        ))
   }
 }
