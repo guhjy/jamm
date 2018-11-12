@@ -142,17 +142,18 @@ conditioning <- R6Class("conditioning",
           res
         },
         center=function(var,data,valueindex,decode=T) {
+          datavar<-var
+          if (decode) var<-jmvcore::fromB64(var)
           obj<-private$cond_specs[[var]]
-          if (decode) var<-jmvcore::toB64(var)
           if (obj$method=="factor") {
-            .levels<-levels(data[,var])
-            stats::contrasts(data[,var]) <- lf.createContrasts(.levels,"dummy",base=valueindex)
-            dummies<-model.matrix(as.formula(paste0("~",var)),data=data)
+            .levels<-levels(data[,datavar])
+            stats::contrasts(data[,datavar]) <- lf.createContrasts(.levels,"dummy",base=valueindex)
+            dummies<-model.matrix(as.formula(paste0("~",datavar)),data=data)
             dummies<-dummies[,-1]
             dummies<-data.frame(dummies)
             dummies
           } else {
-             df<-data.frame(data[,var]-obj$values[valueindex])
+             df<-data.frame(data[,datavar]-obj$values[valueindex])
              names(df)<-var
              df
           }

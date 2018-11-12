@@ -28,7 +28,7 @@ smartMediation <- R6Class("smartMediation",
                                      medModels<-list(list(dep=NULL,ind=NULL))
                                  if (!is.something(fullModel))
                                      fullModel<-list(dep=NULL,ind=NULL)
-                                 
+
                                  self$original_medmodels<-medModels
                                  self$original_fullmodel<-fullModel
                                  self$moderators<-flat_list(moderators)
@@ -386,3 +386,5 @@ smartMediation <- R6Class("smartMediation",
   }
   list(infos=infos,ipaths=ipaths)
 }
+
+

@@ -39,30 +39,15 @@ jammGLMClass <- R6::R6Class(
       infos<-smartMediation$new(meds,full,moderators = mods)
       private$.infos<-infos
       ## prepare main result table
-      if (!is.something(infos$moderators)) {
-             table<-self$results$models$main
-             mr.initTable(infos,table,private$.names64,ciType,ciWidth,self$options$tableOptions)
-      }
+       table<-self$results$models$main
+       if (is.something(infos$moderators))
+           mr.initConditionalTable(infos,table,private$.names64,private$.cov_condition,ciType,ciWidth,self$options$tableOptions)
+       else
+         mr.initTable(infos,table,private$.names64,ciType,ciWidth,self$options$tableOptions)
+       
       if  (is.something(self$options$factors))   
           mi.initContrastCode(data,self$options,self$results,private$.names64)
 
-        if (is.something(infos$moderators)) {
-           moderators<-unique(unlist(sapply(infos$moderators,private$.names64$factorName)))
-           self$results$moderation$setTitle("Conditional Mediation")
-           self$results$moderation$setVisible(TRUE)
-           self$results$moderation$moderationEffects$setVisible(TRUE)
-           
-         for (i in seq_along(moderators)) {
-              mod<-infos$moderators[i]
-              mod<-private$.names64$factorName(mod)
-              labels<-private$.cov_condition$labels(mod)
-              for (i in seq_along(labels)) {
-                key<-paste(mod,labels[i],sep = "=")
-                aTable<-self$results$moderation$simplemodels$addItem(key=key)
-                mr.initTable(infos,aTable,private$.names64,ciType,ciWidth, self$options$tableOptions)
-          }
-        }
-      }
       
     },
     .run=function() {
@@ -101,66 +86,68 @@ jammGLMClass <- R6::R6Class(
       ## fill main mediational results
       ## notice that jmf.modelSummaries return first the individual coefficients
       ## and then the mediated effect. Because in .init the mediated effec is defined ad
-      ## the first row, it format the table well because it uses the rowKey appropriately
+      ## the first row, it formats the table well because it uses the rowKey appropriately
       if (!infos$isEstimable())
          return()
       se<-ifelse(ciType=="standard" || ciType=="none",ciType,"bootstrap")
       params<-jmf.mediationTable(infos,data,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
+      table<-self$results$models$main
+      table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
+      table$setVisible(TRUE)
+      
       if (!is.something(infos$moderators)) {
-           table<-self$results$models$main
-           table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
            for (rowKey in table$rowKeys) {
                row<-params[params$label==rowKey,]
                if (dim(row)[1]>0)
                   table$setRow(rowKey=rowKey,row)
-           table$setVisible(TRUE)
-           self$results$models$setTitle("Mediation")
            }
       } else {
-              modtable<-self$results$moderation$moderationEffects
-              modtable$setVisible(TRUE)
-              moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
-              for (i in seq_along(moderators)) {
-                  mod<-moderators[i]
-                  values<-private$.cov_condition$values(mod)
-                  labels<-private$.cov_condition$labels(mod)
-                  mod64<-jmvcore::toB64(mod)
-       
-              for (i in seq_along(labels)) {
-                  key<-paste(mod,labels[i],sep = "=")
-                  table<-self$results$moderation$simplemodels$get(key=key)
-                  table$setNote("cinote",paste("(a) Confidence intervals computed with method:",NOTES[["ci"]][[ciType]]))
-                  ldata<-data
-                  condata<-private$.cov_condition$center(mod,ldata,i)
-                  for (var in names(condata)) {
-                       ldata[,var]<-condata[,var]
-                  }
+        # first we fill the interaction table    
+        modtable<-self$results$models$moderationEffects
+        modtable$setVisible(TRUE)
+        moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
+        itable<-params[(params$op=="~" & params$model=="med"),]
+        where<-grep("____",itable$rhs, fixed=T)
+        itable<-itable[where,]
+        inters<-list()
+        for (i in 1:nrow(itable)) {
+          row<-itable[i,]
+          w<-strsplit(row$rhs,"____")[[1]]
+          row$mod<-paste(jmvcore::fromB64(w[w %in% infos$moderators]),collapse = ":")
+          target<-jmvcore::composeTerm(jmvcore::fromB64(w))
+          row$target<-.nicifychain(c(target,jmvcore::fromB64(row$lhs)))
+          row$rowKey<-paste(row$lhs,row$rhs,sep="_")
+          inters[[row$rowKey]]<-row
+        }
+        ointers<-do.call(rbind,inters)
+        ointers<-ointers[order(ointers$mod),]
+        for (i in seq_len(nrow(ointers))) 
+            modtable$addRow(rowKey=ointers[i,"rowKey"],ointers[i,]) 
+        
+         # now we fill the simple medation table
+        combs<-expand.levels(infos,private$.cov_condition)
+        ncombs<-expand.levels_numeric(infos,private$.cov_condition)
 
-                params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
-                for (rowKey in table$rowKeys) {
-                    row<-params[params$label==rowKey,]
-                    if (dim(row)[1]>0)
-                          table$setRow(rowKey=rowKey,row)
-                }
-         
-              }
-               itable<-params[(params$op=="~" & params$model=="med"),]
-               where<-grep(mod64,itable$rhs, fixed=T)
-               itable<-itable[where,]
-               where<-grep(":",itable$rhs, fixed=T)
-               itable<-itable[where,]
-               for (i in 1:nrow(itable)) {
-                   row<-itable[i,]
-                   row$mod=mod
-                   w<-strsplit(row$rhs,":")[[1]]
-                   w<-w[(w!=mod64)]
-                   target<-jmvcore::fromB64(w)
-                   row$target<-.nicifychain(c(target,jmvcore::fromB64(row$lhs)))
-                   rowKey<-paste(row$lhs,row$rhs,sep="_")
-                   modtable$addRow(rowKey=rowKey,row) 
-               }
-              }
-       }
+        for (j in nrow(ncombs)) {     
+          ldata<-data
+          values<-ncombs[j,]
+          for (mname in names(values)) {
+            condata<-private$.cov_condition$center(mname,ldata,values[[mname]])
+            for (var in names(condata)) {
+              ldata[,var]<-condata[,var]
+            }
+            params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
+           for (rowKey in table$rowKeys) {
+             mark(rowKey)
+              keys<-strsplit(rowKey,"_..._",fixed = T)[[1]]
+              tableKey<-keys[[2]]
+              row<-params[params$label==tableKey,]
+              if (dim(row)[1]>0)
+                 table$setRow(rowKey=rowKey,row)
+           }
+         }
+        }
+      }
     },
   .cleandata=function() {
       n64<-private$.names64
@@ -302,6 +289,7 @@ jammGLMClass <- R6::R6Class(
                   endhead=F, arr.type="triangle",arr.length = arr.lenght,
                   ,arr.pos=.7,arr.col = "gray",lcol = paths$colors,box.lcol=paths$bcolors)
 
+  test<-try({
   ### then we add the moderators
   mp<-infos$moderatedPaths()
    for (i in seq_along(mp)) 
@@ -309,9 +297,14 @@ jammGLMClass <- R6::R6Class(
           coord=mp[[i]][[j]]
           diag.plot_mod_arr(plot,coord$from,coord$to,i)
         }
-
+  })
+  if (jmvcore::isError(test)) {
+    self$results$pathmodelgroup$pathmodel$setVisible(FALSE)
+    self$results$pathmodelgroup$pathnotes$addRow(rowKey="noluck",list(info=NOTES$diag$noluck))
+    return(TRUE)
+  }
+    
   diag.plot_mods(plot,infos$moderators)
-
   TRUE
 },
 .sourcifyOption = function(option) {
