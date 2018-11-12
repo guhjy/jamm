@@ -5,7 +5,7 @@ Version: 0.0.5
 Author: Marcello Gallucci
 Maintainer: Marcello Gallucci <mcfanda@gmail.com>
 Description: A suite for estimation of mediational models, including multiple mediators, and conditional mediation
-License: GPL
+License: GPL2+
 Encoding: UTF-8
 LazyData: true
 Imports: jmvcore (>= 0.8.0), diagram, gridExtra, lavaan
