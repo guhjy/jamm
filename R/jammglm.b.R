@@ -47,7 +47,6 @@ jammGLMClass <- R6::R6Class(
        
       if  (is.something(self$options$factors))   
           mi.initContrastCode(data,self$options,self$results,private$.names64)
-
       
     },
     .run=function() {
@@ -80,7 +79,7 @@ jammGLMClass <- R6::R6Class(
       }
 
       if (!is.null(covs)) {
-        private$.cov_condition$storeValues(data,decode=TRUE)
+        private$.cov_condition$storeValues(data)
         private$.cov_condition$labels_type=self$options$simpleScaleLabels
       }
       ## fill main mediational results
@@ -105,7 +104,10 @@ jammGLMClass <- R6::R6Class(
         # first we fill the interaction table    
         modtable<-self$results$models$moderationEffects
         modtable$setVisible(TRUE)
+        
         moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
+        moderators64<-jmvcore::toB64(moderators)
+        
         itable<-params[(params$op=="~" & params$model=="med"),]
         where<-grep("____",itable$rhs, fixed=T)
         itable<-itable[where,]
@@ -113,8 +115,9 @@ jammGLMClass <- R6::R6Class(
         for (i in 1:nrow(itable)) {
           row<-itable[i,]
           w<-strsplit(row$rhs,"____")[[1]]
-          row$mod<-paste(jmvcore::fromB64(w[w %in% infos$moderators]),collapse = ":")
-          target<-jmvcore::composeTerm(jmvcore::fromB64(w))
+          nicew<-n64$nicenames(w)
+          row$mod<-paste(nicew[w %in% infos$moderators],collapse = ":")
+          target<-jmvcore::composeTerm(nicew)
           row$target<-.nicifychain(c(target,jmvcore::fromB64(row$lhs)))
           row$rowKey<-paste(row$lhs,row$rhs,sep="_")
           inters[[row$rowKey]]<-row
@@ -125,27 +128,26 @@ jammGLMClass <- R6::R6Class(
             modtable$addRow(rowKey=ointers[i,"rowKey"],ointers[i,]) 
         
          # now we fill the simple medation table
-        combs<-expand.levels(infos,private$.cov_condition)
-        ncombs<-expand.levels_numeric(infos,private$.cov_condition)
-
-        for (j in nrow(ncombs)) {     
+        ncombs<-expand.levels_numeric(moderators64,private$.cov_condition)
+        mnames<-names(ncombs)
+        for (j in 1:nrow(ncombs)) {     
           ldata<-data
-          values<-ncombs[j,]
-          for (mname in names(values)) {
-            condata<-private$.cov_condition$center(mname,ldata,values[[mname]])
+          for (mname in mnames) {
+            condata<-private$.cov_condition$center(mname,ldata,ncombs[j,mname])
             for (var in names(condata)) {
               ldata[,var]<-condata[,var]
             }
-            params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
-           for (rowKey in table$rowKeys) {
-             mark(rowKey)
-              keys<-strsplit(rowKey,"_..._",fixed = T)[[1]]
-              tableKey<-keys[[2]]
-              row<-params[params$label==tableKey,]
-              if (dim(row)[1]>0)
+          }
+#          mark(head(ldata))
+           tableKeys<-table$rowKeys
+           params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
+           for (i in seq_along(params$label)) {
+              row<-params[i,]
+              rowKey<-paste(j,row$label,sep="_..._")
+              if (rowKey %in% tableKeys) {
                  table$setRow(rowKey=rowKey,row)
-           }
-         }
+              }
+        }
         }
       }
     },
@@ -171,7 +173,8 @@ jammGLMClass <- R6::R6Class(
       ### initialize conditioning of covariates
       if (!is.null(self$options$covs)) {
         span<-ifelse(self$options$simpleScale=="mean_sd",self$options$cvalue,self$options$percvalue)
-        private$.cov_condition<-conditioning$new(self$options$covs,self$options$simpleScale,span)
+        vars64<-jmvcore::toB64(self$options$covs)
+        private$.cov_condition<-conditioning$new(vars64,self$options$simpleScale,span)
       }
       #####################
       for (med in mediators) {
@@ -185,20 +188,22 @@ jammGLMClass <- R6::R6Class(
           info(paste("Warning, variable",factor," has been coerced to factor"))
           dataRaw[[factor]]<-factor(dataRaw[[factor]])
         }
-        data[[jmvcore::toB64(factor)]] <- dataRaw[[factor]]
-        levels <- base::levels(data[[jmvcore::toB64(factor)]])
-        stats::contrasts(data[[jmvcore::toB64(factor)]]) <- lf.createContrasts(levels,"deviation")
+        factor64<-jmvcore::toB64(factor)
+        data[[factor64]] <- dataRaw[[factor]]
+        levels <- base::levels(data[[factor64]])
+        stats::contrasts(data[[factor64]]) <- lf.createContrasts(levels,"deviation")
         n64$addFactor(factor,levels)
         n64$addLabel(factor,lf.contrastLabels(levels, "deviation")) 
-        attr(data[[jmvcore::toB64(factor)]],"jcontrast")<-"deviation"
-        private$.cov_condition$addFactor(factor,levels)
+        attr(data[[factor64]],"jcontrast")<-"deviation"
+        private$.cov_condition$addFactor(factor64,levels)
       }
       
       for (contrast in self$options$contrasts) {
-        levels <- base::levels(data[[jmvcore::toB64(contrast$var)]])
-        stats::contrasts(data[[jmvcore::toB64(contrast$var)]]) <- lf.createContrasts(levels, contrast$type)
+        var64<-jmvcore::toB64(contrast$var)
+        levels <- base::levels(data[[var64]])
+        stats::contrasts(data[[var64]]) <- lf.createContrasts(levels, contrast$type)
         n64$addLabel(contrast$var,lf.contrastLabels(levels, contrast$type)) 
-        attr(data[[jmvcore::toB64(contrast$var)]],"jcontrast")<-contrast$type
+        attr(data[[var64]],"jcontrast")<-contrast$type
         dummies<-model.matrix(as.formula(paste0("~",jmvcore::toB64(contrast$var))),data=data)
         dummies<-dummies[,-1]
         dummies<-data.frame(dummies)

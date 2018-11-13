@@ -40,7 +40,7 @@ conditioning <- R6Class("conditioning",
           obj$labels<-unlist(levels)
           private$cond_specs[[var]]<-obj
         },
-        storeValues=function(vardata,varname=NULL,decode=FALSE) {
+        storeValues=function(vardata,varname=NULL) {
           
           .storeValues<-function(vardata,varname) {
                  obj<-private$cond_specs[[varname]]
@@ -57,13 +57,6 @@ conditioning <- R6Class("conditioning",
                     private$cond_specs[[varname]]$values<-(round(quantile(vardata,c(.5-.span,.5,.5+.span)),digits=3))
                 }
           }
-          if (decode) {
-            if (!is.null(varname))
-                varname<-jmvcore::fromB64(varname)
-            if (is.data.frame(vardata)) 
-                names(vardata)<-jmvcore::fromB64(names(vardata))
-          }
-
           if (is.data.frame(vardata)) {
             for (name in self$vars)
               if (name %in% names(vardata))
@@ -141,19 +134,21 @@ conditioning <- R6Class("conditioning",
             res<-res[[1]]
           res
         },
-        center=function(var,data,valueindex,decode=T) {
-          datavar<-var
-          if (decode) var<-jmvcore::fromB64(var)
+        center=function(var,data,valueindex) {
           obj<-private$cond_specs[[var]]
+          
           if (obj$method=="factor") {
-            .levels<-levels(data[,datavar])
-            stats::contrasts(data[,datavar]) <- lf.createContrasts(.levels,"dummy",base=valueindex)
-            dummies<-model.matrix(as.formula(paste0("~",datavar)),data=data)
+            .levels<-levels(data[,var])
+            stats::contrasts(data[,var]) <- lf.createContrasts(.levels,"dummy",base=valueindex)
+            dummies<-model.matrix(as.formula(paste0("~",var)),data=data)
+            dnames<-colnames(dummies)[-1]
             dummies<-dummies[,-1]
             dummies<-data.frame(dummies)
+            names(dummies)<-dnames
             dummies
+            
           } else {
-             df<-data.frame(data[,datavar]-obj$values[valueindex])
+             df<-data.frame(data[,var]-obj$values[valueindex])
              names(df)<-var
              df
           }
