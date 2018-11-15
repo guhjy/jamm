@@ -497,12 +497,6 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #' GLM Mediation Model
 #'
 #' GLM mediation model
-#'
-#' @examples
-#' data('ToothGrowth')
-#'
-#' mixed(ToothGrowth, dep = 'len', factors = 'supp', covs = 'dose')
-#'
 #' @param data the data as a data frame
 #' @param dep a string naming the dependent variable from \code{data},
 #'   variable must be numeric

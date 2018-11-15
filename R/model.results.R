@@ -1,3 +1,39 @@
+.nicifyTerms<-function(term) {
+  term <- jmvcore::decomposeTerm(term)
+  term <- jmvcore::stringifyTerm(term)
+  term
+}
+
+
+.nicifychain<-function(chain) {
+  wherenot<-grep("..mod..",chain,fixed = T,invert = T)
+  where<-grep("..mod..",chain,fixed = T)
+  .chain<-chain[wherenot]
+  nice<-paste(.chain,collapse   = " \U21d2 " )  
+  if (is.something(where)) {
+    mods<-paste(chain[where],collapse = ",")
+    mods<-gsub("..mod..","",mods,fixed = T)
+    nice<-paste(nice,"mod by",mods)
+  }
+  nice
+}
+
+.nicifychain64<-function(chain,n64) {
+  wherenot<-grep("..mod..",chain,fixed = T,invert = T)
+  where<-grep("..mod..",chain,fixed = T)
+  .chain<-chain[wherenot]
+  .chain<-n64$nicenames(.chain)
+  nice<-paste(.chain,collapse   = " \U21d2 " )  
+  if (is.something(where)) {
+    mods<-paste(chain[where],collapse = ",")
+    mods<-gsub("..mod..","",mods,fixed = T)
+    nice<-paste(nice,"mod by",n64$translate(mods))
+  }
+  nice
+}
+
+
+
 mr.initConditionalTable<-function(infos,resultsTable,n64,cov_condition,ciType,ciWidth,tableOptions) {
  
     moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))

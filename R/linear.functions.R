@@ -13,7 +13,7 @@ lf.createContrasts=function(levels, type, base=0) {
   nLevels <- length(levels)
 
   if (type == 'simple') {
-    dummy <- contr.treatment(levels)
+    dummy <- stats::contr.treatment(levels)
     dimnames(dummy) <- NULL
     coding <- matrix(rep(1/nLevels, prod(dim(dummy))), ncol=nLevels-1)
     contrast <- (dummy - coding)
@@ -190,5 +190,10 @@ lf.factorize<-function(vars,factors, n64) {
 }
   
 
+lf.modelFormula<-function(alist) {
+  dep <- alist$dep
+  lformula<-jmvcore::constructFormula(dep=dep,alist$ind) 
+  return(lformula)
+}
 
 

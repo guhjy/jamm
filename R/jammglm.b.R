@@ -43,7 +43,6 @@ jammGLMClass <- R6::R6Class(
        if (is.something(infos$moderators)) {
          modtable<-self$results$models$moderationEffects
          modtable$setVisible(TRUE)
-         mr.initInteractionTable(infos,table)
          mr.initConditionalTable(infos,table,private$.names64,private$.cov_condition,ciType,ciWidth,self$options$tableOptions)
        }
        else
