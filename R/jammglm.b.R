@@ -40,8 +40,12 @@ jammGLMClass <- R6::R6Class(
       private$.infos<-infos
       ## prepare main result table
        table<-self$results$models$main
-       if (is.something(infos$moderators))
-           mr.initConditionalTable(infos,table,private$.names64,private$.cov_condition,ciType,ciWidth,self$options$tableOptions)
+       if (is.something(infos$moderators)) {
+         modtable<-self$results$models$moderationEffects
+         modtable$setVisible(TRUE)
+         mr.initInteractionTable(infos,table)
+         mr.initConditionalTable(infos,table,private$.names64,private$.cov_condition,ciType,ciWidth,self$options$tableOptions)
+       }
        else
          mr.initTable(infos,table,private$.names64,ciType,ciWidth,self$options$tableOptions)
        
@@ -103,8 +107,7 @@ jammGLMClass <- R6::R6Class(
       } else {
         # first we fill the interaction table    
         modtable<-self$results$models$moderationEffects
-        modtable$setVisible(TRUE)
-        
+
         moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
         moderators64<-jmvcore::toB64(moderators)
         
@@ -130,6 +133,8 @@ jammGLMClass <- R6::R6Class(
          # now we fill the simple medation table
         ncombs<-expand.levels_numeric(moderators64,private$.cov_condition)
         mnames<-names(ncombs)
+        lcombs<-expand.levels(moderators64,private$.cov_condition)
+        mark(lcombs)
         for (j in 1:nrow(ncombs)) {     
           ldata<-data
           for (mname in mnames) {
@@ -138,11 +143,12 @@ jammGLMClass <- R6::R6Class(
               ldata[,var]<-condata[,var]
             }
           }
-#          mark(head(ldata))
            tableKeys<-table$rowKeys
            params<-jmf.mediationTable(infos,ldata,level = ciWidth,se=se, boot.ci=ciType,bootN=bootN)
            for (i in seq_along(params$label)) {
               row<-params[i,]
+              for (name in names(lcombs))
+                row[[name]]<-lcombs[j,name]
               rowKey<-paste(j,row$label,sep="_..._")
               if (rowKey %in% tableKeys) {
                  table$setRow(rowKey=rowKey,row)

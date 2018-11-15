@@ -404,7 +404,6 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                             options=options,
                             name="main",
                             title="Indirect and Total Effects",
-                            visible=FALSE,
                             clearWith=list(
                                 "dep",
                                 "modelTerms",

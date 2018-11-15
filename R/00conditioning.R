@@ -114,18 +114,24 @@ conditioning <- R6Class("conditioning",
           specs<-private$cond_specs[var]
           if (type=="values")
             for (one in names(specs)) {
-              res[[one]]<-round(specs[[one]]$values,digits = 3)
+              if (specs[[one]]$method=="factor")
+                  res[[one]]<-specs[[one]]$values
+              else
+                res[[one]]<-round(specs[[one]]$values,digits = 3)
             }
           if (type=="labels")
             for (one in names(specs)) {
               res[[one]]<-specs[[one]]$labels
             }
           if (type=="values_labels")
-            for (one in names(specs)) {
-              if (all(specs[[one]]$labels==round(specs[[one]]$values,digits = 3)))
-                  res[[one]]<-specs[[one]]$labels
-              else                  
-                  res[[one]]<-paste(specs[[one]]$labels,round(specs[[one]]$values,digits = 3),sep = "=")
+             for (one in names(specs)) {
+               if (specs[[one]]$method=="factor")
+                 res[[one]]<-specs[[one]]$labels
+               else
+                  if (all(specs[[one]]$labels==round(specs[[one]]$values,digits = 3)))
+                    res[[one]]<-specs[[one]]$labels
+                  else                  
+                    res[[one]]<-paste(specs[[one]]$labels,round(specs[[one]]$values,digits = 3),sep = "=")
             }
           if (decode)
             names(res)<-jmvcore::toB64(names(res))
@@ -179,7 +185,7 @@ conditioning <- R6Class("conditioning",
               if (obj=="mean_sd") {
                 res<-list(method="mean_sd",
                           span=span,
-                          labels=(c(paste0("Mean-",span,"\U22C5","SD"),"Mean",paste0("Mean+",span,"\U22C5","SD"))),
+                          labels=(c(paste0("Mean-",span,"\u00B7","SD"),"Mean",paste0("Mean+",span,"\u00B7","SD"))),
                           values=NULL)
                 return(res)
               }
