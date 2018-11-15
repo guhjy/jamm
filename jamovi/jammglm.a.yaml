@@ -2,7 +2,7 @@
 name: jammGLM
 title: GLM Mediation Model
 menuGroup: Linear Models
-version: '0.0.2'
+version: '0.0.6'
 jas: '1.2'
 completeWhenFilled: false
 description:
