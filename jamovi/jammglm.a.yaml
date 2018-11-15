@@ -8,11 +8,7 @@ completeWhenFilled: false
 description:
     main: GLM mediation model
     R:
-        dontrun: false
-        usage: |
-            data('ToothGrowth')
-
-            mixed(ToothGrowth, dep = 'len', factors = 'supp', covs = 'dose')
+        dontrun: true
 
 
 options:

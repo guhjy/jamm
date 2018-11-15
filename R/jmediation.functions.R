@@ -34,7 +34,6 @@ jmf.mediationSummary <-
         jmvcore::reject(msg)
     }
     fit
-    
   }
 
 jmf.mediationTotal <-
@@ -132,26 +131,24 @@ jmf.mediationTable <- function(
   data
 }
 
-expand.levels<-function(infos,cov_condition) {
-     
+expand.levels<-function(moderators,cov_condition) {
      labelsList<-list()
-     for (i in seq_along(infos$moderators)) {
-          mod64<-infos$moderators[i]
-          mod<-jmvcore::fromB64(mod64)
-          labelsList[[mod64]]<-cov_condition$labels(mod)
+     for (i in seq_along(moderators)) {
+          mod<-moderators
+          labelsList[[mod]]<-cov_condition$labels(mod)
      }
      labelsList<-rev(labelsList)
      expand.grid(labelsList,stringsAsFactors = F)
 }
 
-expand.levels_numeric<-function(infos,cov_condition) {
+expand.levels_numeric<-function(moderators,cov_condition) {
   
   labelsList<-list()
-  for (i in seq_along(infos$moderators)) {
-    mod64<-infos$moderators[i]
-    mod<-jmvcore::fromB64(mod64)
-    labelsList[[mod64]]<-seq_along(cov_condition$labels(mod))
+  for (i in seq_along(moderators)) {
+    mod<-moderators[i]
+    labelsList[[mod]]<-seq_along(cov_condition$labels(mod))
   }
   labelsList<-rev(labelsList)
-  expand.grid(labelsList,stringsAsFactors = F)
+  eg<-expand.grid(labelsList,stringsAsFactors = F)
+  as.data.frame(eg)
 }

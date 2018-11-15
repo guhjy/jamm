@@ -1,16 +1,50 @@
+.nicifyTerms<-function(term) {
+  term <- jmvcore::decomposeTerm(term)
+  term <- jmvcore::stringifyTerm(term)
+  term
+}
+
+
+.nicifychain<-function(chain) {
+  wherenot<-grep("..mod..",chain,fixed = T,invert = T)
+  where<-grep("..mod..",chain,fixed = T)
+  .chain<-chain[wherenot]
+  nice<-paste(.chain,collapse   = " \U21d2 " )  
+  if (is.something(where)) {
+    mods<-paste(chain[where],collapse = ",")
+    mods<-gsub("..mod..","",mods,fixed = T)
+    nice<-paste(nice,"mod by",mods)
+  }
+  nice
+}
+
+.nicifychain64<-function(chain,n64) {
+  wherenot<-grep("..mod..",chain,fixed = T,invert = T)
+  where<-grep("..mod..",chain,fixed = T)
+  .chain<-chain[wherenot]
+  .chain<-n64$nicenames(.chain)
+  nice<-paste(.chain,collapse   = " \U21d2 " )  
+  if (is.something(where)) {
+    mods<-paste(chain[where],collapse = ",")
+    mods<-gsub("..mod..","",mods,fixed = T)
+    nice<-paste(nice,"mod by",n64$translate(mods))
+  }
+  nice
+}
+
+
+
 mr.initConditionalTable<-function(infos,resultsTable,n64,cov_condition,ciType,ciWidth,tableOptions) {
  
     moderators<-unique(unlist(sapply(infos$moderators,n64$factorName)))
+    moderators64<-jmvcore::toB64(moderators)
+    
     resultsTable$setTitle("Conditional Mediation")
     labelsList<-list()
-    
-    for (i in seq_along(infos$moderators)) {
-      mod64<-infos$moderators[i]
-      mod<-jmvcore::fromB64(mod64)
-      resultsTable$addColumn(mod64,index=i,title=mod,superTitle="Moderator levels")
+    for (i in seq_along(moderators)) {
+      resultsTable$addColumn(moderators64[i],index=i,title=moderators[i],superTitle="Moderator levels")
     }
-    
-    combs<-expand.levels(infos,cov_condition)
+    combs<-expand.levels(moderators64,cov_condition)
     ierecoded<-lapply(infos$ieffects, function(x) gsub(":","____",x))
     components<-list()
     indirects<-list()
@@ -48,7 +82,7 @@ mr.initConditionalTable<-function(infos,resultsTable,n64,cov_condition,ciType,ci
          row<-list(source=.nicifychain64(teName,n64),type="Total")
          totals[[rowKey]]<-row
     }
- 
+
     for (j in 1:dim(combs)[1]) {
        for (rowKey in names(indirects)) {
           newKey<-paste(j,rowKey,sep = "_..._")

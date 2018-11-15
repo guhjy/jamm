@@ -142,7 +142,7 @@ diag.paths<-function(infos,suggested=F,shiftmed=0) {
   iodd<-ni %% 2
   modd<-nm %% 2
   if (iodd==1 & modd==1)
-    M[infos$nvars,median(1:ni)]<-.15
+    M[infos$nvars,stats::median(1:ni)]<-.15
   ## curve extremes in a mediators chain
   if (nm>2) {
     for (i in seq_len(nm-2)) {

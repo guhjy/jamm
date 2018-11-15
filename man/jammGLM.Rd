@@ -10,7 +10,7 @@ jammGLM(data, dep = NULL, mediators = NULL, factors = NULL,
   showRealNames = TRUE, showContrastCode = FALSE, bogus = FALSE,
   simpleScale = "mean_sd", cvalue = 1, percvalue = 25,
   simpleScaleLabels = "labels", scaling = NULL,
-  effectSize = list("beta"), mediatorsTerms = list(list()),
+  tableOptions = list("beta"), mediatorsTerms = list(list()),
   moderatorsTerms = list(list()))
 }
 \arguments{
@@ -63,7 +63,7 @@ children}}
 \code{'centered to the mean'}, \code{'standardized'}, or \code{'none'}.
 \code{'none'} leaves the variable as it is}
 
-\item{effectSize}{.}
+\item{tableOptions}{.}
 
 \item{mediatorsTerms}{a list of lists specifying the models for with the
 mediators as dependent variables.}
@@ -77,10 +77,9 @@ A results object containing:
   \code{results$info} \tab \tab \tab \tab \tab a table \cr
   \code{results$pathmodelgroup$pathmodel} \tab \tab \tab \tab \tab a path model \cr
   \code{results$pathmodelgroup$pathnotes} \tab \tab \tab \tab \tab a table \cr
+  \code{results$models$moderationEffects} \tab \tab \tab \tab \tab a table \cr
   \code{results$models$main} \tab \tab \tab \tab \tab a table \cr
   \code{results$models$contrastCodeTables} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
-  \code{results$models$medmodels} \tab \tab \tab \tab \tab an array of contrast coefficients tables \cr
-  \code{results$models$fullmodel} \tab \tab \tab \tab \tab a table \cr
 }
 
 Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.frame}}. For example:
@@ -91,10 +90,4 @@ Tables can be converted to data frames with \code{asDF} or \code{\link{as.data.f
 }
 \description{
 GLM mediation model
-}
-\examples{
-data('ToothGrowth')
-
-mixed(ToothGrowth, dep = 'len', factors = 'supp', covs = 'dose')
-
 }

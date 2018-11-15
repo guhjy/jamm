@@ -122,7 +122,6 @@ items:
           - name: main
             title: Indirect and Total Effects
             type: Table
-            visible: false
             clearWith:
                      - dep
                      - modelTerms

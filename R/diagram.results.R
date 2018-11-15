@@ -123,7 +123,7 @@ ds.modelInfo <- function(infos, self, n64) {
     forms[[length(infos$original_medmodels)+1]]<-infos$original_fullmodel
     modelFormulas<-list()
     for (i in seq_along(forms)) {
-      modelFormulas[[i]]<-mf.modelFormula(forms[[i]])
+      modelFormulas[[i]]<-lf.modelFormula(forms[[i]])
       modelFormulas[[i]]<-n64$translate(modelFormulas[[i]])
     }
     n <- length(modelFormulas)
