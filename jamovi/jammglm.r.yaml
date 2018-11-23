@@ -52,7 +52,8 @@ items:
                   - mediatorsTerms
                   - modelTerms
                   - moderatorsTerms
-              
+                  - pathOptions
+                  
             - name: pathnotes
               type: Table
               title: ""
