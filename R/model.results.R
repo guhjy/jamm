@@ -32,6 +32,31 @@
   nice
 }
 
+mr.initContrastCode<-function(data,options,results,n64) {
+  
+  
+  factorsAvailable <- options$factors
+  if (length(factorsAvailable)==0)
+    return()
+  tables<-results$models$contrastCodeTables
+  for (fac in factorsAvailable) {
+    rnames<-n64$nicenames(n64$contrasts(fac))
+    clabs<-n64$contrastsLabels(fac)
+    aTable<-tables$addItem(key=fac)
+    codes<-round(t(contrasts(data[[jmvcore::toB64(fac)]])),digit=3)
+    cnames<-colnames(codes)
+    colnames(codes)<-paste0("c",1:length(cnames))
+    codes<-cbind(rnames,clabs,codes)
+    for (i in seq_along(cnames)) {
+      aTable$addColumn(name=paste0("c",i), title=paste0("level=",cnames[i]), type='text')
+    }
+    for (i in 1:nrow(codes)) {
+      aTable$addRow(rowKey=i, values=codes[i,])
+    }
+    tables$setVisible(TRUE)
+  }  
+  
+}
 
 
 mr.initConditionalTable<-function(infos,resultsTable,n64,cov_condition,ciType,ciWidth,tableOptions) {

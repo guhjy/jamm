@@ -249,6 +249,14 @@ options:
             title: β  
       default:
           - beta
+
+    - name: pathOptions
+      type: NMXList
+      options:
+          - name: suggested
+            title: Suggested paths
+      default:
+          - suggested
           
     - name: mediatorsTerms
       title: Models for mediators

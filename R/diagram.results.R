@@ -10,7 +10,7 @@ ds.annotate.diagram <- function(infos, paths, notes, options, n64) {
                  list(info = "Red paths indicate required coefficients"))
     notes$setVisible(TRUE)
   }
-  if (infos$hasSuggested()) {
+  if (infos$hasSuggested() && ("suggested" %in% options$pathOptions)) {
     notes$addRow("green",
                  list(info = "Green paths indicate suggested coefficients"))
     notes$setVisible(TRUE)
@@ -50,6 +50,13 @@ ds.annotate.diagram <- function(infos, paths, notes, options, n64) {
     notes$setVisible(TRUE)
 
   }
+  
+  if (length(infos$independents)>1) {
+    note ="Covariances among IV are estimated but not shown"
+    notes$addRow("xcov", list(info = note))
+    notes$setVisible(TRUE)
+  }
+  
 }
 
 ds.initModelInfo <- function(self) {

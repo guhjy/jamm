@@ -49,7 +49,7 @@ jammGLMClass <- R6::R6Class(
          mr.initTable(infos,table,private$.names64,ciType,ciWidth,self$options$tableOptions)
        
       if  (is.something(self$options$factors))   
-          mi.initContrastCode(data,self$options,self$results,private$.names64)
+          mr.initContrastCode(data,self$options,self$results,private$.names64)
       
     },
     .run=function() {
@@ -230,7 +230,7 @@ jammGLMClass <- R6::R6Class(
   infoTable<-self$results$info
   
   n64<-private$.names64
-  
+  suggested<-("suggested" %in% self$options$pathOptions)
   dep64<-jmvcore::toB64(self$options$dep)
   covs64<-jmvcore::toB64(self$options$covs)
   factors64<-jmvcore::toB64(self$options$factors)
@@ -262,7 +262,7 @@ jammGLMClass <- R6::R6Class(
   infos<-smartMediation$new(medmodels64,fullmodel64,moderators = modTerms64)
   #### prepare the diagram
   image <- self$results$pathmodelgroup$get('pathmodel')
-  paths<-diag.paths(infos,suggested = T,shiftmed=.01)
+  paths<-diag.paths(infos,suggested = suggested,shiftmed=.01)
 
   # for (i in seq_along(paths$labs))
   #         if (paths$labs[[i]] %in% factors) {

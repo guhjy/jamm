@@ -25,6 +25,8 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             scaling = NULL,
             tableOptions = list(
                 "beta"),
+            pathOptions = list(
+                "suggested"),
             mediatorsTerms = list(
                 list()),
             moderatorsTerms = list(
@@ -176,6 +178,13 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
                     "beta"),
                 default=list(
                     "beta"))
+            private$..pathOptions <- jmvcore::OptionNMXList$new(
+                "pathOptions",
+                pathOptions,
+                options=list(
+                    "suggested"),
+                default=list(
+                    "suggested"))
             private$..mediatorsTerms <- jmvcore::OptionArray$new(
                 "mediatorsTerms",
                 mediatorsTerms,
@@ -211,6 +220,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
             self$.addOption(private$..simpleScaleLabels)
             self$.addOption(private$..scaling)
             self$.addOption(private$..tableOptions)
+            self$.addOption(private$..pathOptions)
             self$.addOption(private$..mediatorsTerms)
             self$.addOption(private$..moderatorsTerms)
         }),
@@ -233,6 +243,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         simpleScaleLabels = function() private$..simpleScaleLabels$value,
         scaling = function() private$..scaling$value,
         tableOptions = function() private$..tableOptions$value,
+        pathOptions = function() private$..pathOptions$value,
         mediatorsTerms = function() private$..mediatorsTerms$value,
         moderatorsTerms = function() private$..moderatorsTerms$value),
     private = list(
@@ -254,6 +265,7 @@ jammGLMOptions <- if (requireNamespace('jmvcore')) R6::R6Class(
         ..simpleScaleLabels = NA,
         ..scaling = NA,
         ..tableOptions = NA,
+        ..pathOptions = NA,
         ..mediatorsTerms = NA,
         ..moderatorsTerms = NA)
 )
@@ -320,7 +332,8 @@ jammGLMResults <- if (requireNamespace('jmvcore')) R6::R6Class(
                                 "dep",
                                 "mediatorsTerms",
                                 "modelTerms",
-                                "moderatorsTerms")))
+                                "moderatorsTerms",
+                                "pathOptions")))
                         self$add(jmvcore::Table$new(
                             options=options,
                             name="pathnotes",
@@ -483,7 +496,7 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
             super$initialize(
                 package = 'jamm',
                 name = 'jammGLM',
-                version = c(0,0,2),
+                version = c(0,0,6),
                 options = options,
                 results = jammGLMResults$new(options=options),
                 data = data,
@@ -529,6 +542,7 @@ jammGLMBase <- if (requireNamespace('jmvcore')) R6::R6Class(
 #'   \code{'centered to the mean'}, \code{'standardized'}, or \code{'none'}.
 #'   \code{'none'} leaves the variable as it is
 #' @param tableOptions .
+#' @param pathOptions .
 #' @param mediatorsTerms a list of lists specifying the models for with the
 #'   mediators as dependent variables.
 #' @param moderatorsTerms a list of lists specifying the the IV which
@@ -571,6 +585,8 @@ jammGLM <- function(
     scaling = NULL,
     tableOptions = list(
                 "beta"),
+    pathOptions = list(
+                "suggested"),
     mediatorsTerms = list(
                 list()),
     moderatorsTerms = list(
@@ -606,6 +622,7 @@ jammGLM <- function(
         simpleScaleLabels = simpleScaleLabels,
         scaling = scaling,
         tableOptions = tableOptions,
+        pathOptions = pathOptions,
         mediatorsTerms = mediatorsTerms,
         moderatorsTerms = moderatorsTerms)
 

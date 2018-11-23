@@ -339,3 +339,12 @@ children:
                 type: CheckBox
                 optionName: tableOptions
                 optionPart: beta
+          - type: Label
+            label: Path model
+            margin: large
+            style: list
+            children:
+              - name: pathOptions_suggested
+                type: CheckBox
+                optionPart: suggested
+                optionName: pathOptions
