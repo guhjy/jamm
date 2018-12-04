@@ -134,7 +134,7 @@ jmf.mediationTable <- function(
 expand.levels<-function(moderators,cov_condition) {
      labelsList<-list()
      for (i in seq_along(moderators)) {
-          mod<-moderators
+          mod<-moderators[i]
           labelsList[[mod]]<-cov_condition$labels(mod)
      }
      labelsList<-rev(labelsList)
