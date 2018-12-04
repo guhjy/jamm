@@ -8,7 +8,7 @@
   data
 }
 
-lf.createContrasts=function(levels, type, base=0) {
+lf.createContrasts=function(levels, type, base=1) {
   
   nLevels <- length(levels)
 
